@@ -6,17 +6,14 @@ import { useTheme } from '@/contexts/ThemeContext'
 
 export default function MobileNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { currentPalette } = useTheme()
+  const { currentTheme } = useTheme()
 
   // Header siempre negro
   const headerBg = '#0D0D0D'
   
   // Colores para los elementos del header según el tema
-  const isLightTheme = currentPalette === 'vanillaSilk' || currentPalette === 'pearlMist' || currentPalette === 'softGoldEssence'
-  const accentColor = currentPalette === 'vanillaSilk' ? '#D9BE85' : 
-                     currentPalette === 'pearlMist' ? '#E7D8A9' : 
-                     currentPalette === 'softGoldEssence' ? '#E5CC8F' : 
-                     'var(--theme-accent)'
+  // Usar los colores del tema actual
+  const accentColor = currentTheme.colors.accent
 
   return (
     <>
@@ -32,16 +29,8 @@ export default function MobileNavbar() {
             <div 
               className="w-8 h-8 rounded-lg flex items-center justify-center border"
               style={{
-                backgroundColor: isLightTheme
-                  ? (currentPalette === 'vanillaSilk' ? 'rgba(217, 190, 133, 0.2)' : 
-                     currentPalette === 'pearlMist' ? 'rgba(231, 216, 169, 0.2)' : 
-                     'rgba(229, 204, 143, 0.2)')
-                  : 'rgba(168, 124, 42, 0.2)',
-                borderColor: isLightTheme
-                  ? (currentPalette === 'vanillaSilk' ? 'rgba(217, 190, 133, 0.4)' : 
-                     currentPalette === 'pearlMist' ? 'rgba(231, 216, 169, 0.4)' : 
-                     'rgba(229, 204, 143, 0.4)')
-                  : 'rgba(168, 124, 42, 0.4)'
+                backgroundColor: `${accentColor}33`, // 20% opacity
+                borderColor: `${accentColor}66` // 40% opacity
               }}
             >
               <svg 
@@ -71,16 +60,8 @@ export default function MobileNavbar() {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 rounded-lg border transition-all duration-200"
             style={{
-              backgroundColor: isLightTheme
-                ? (currentPalette === 'vanillaSilk' ? 'rgba(217, 190, 133, 0.1)' : 
-                   currentPalette === 'pearlMist' ? 'rgba(231, 216, 169, 0.1)' : 
-                   'rgba(229, 204, 143, 0.1)')
-                : 'rgba(168, 124, 42, 0.1)',
-              borderColor: isLightTheme
-                ? (currentPalette === 'vanillaSilk' ? 'rgba(217, 190, 133, 0.3)' : 
-                   currentPalette === 'pearlMist' ? 'rgba(231, 216, 169, 0.3)' : 
-                   'rgba(229, 204, 143, 0.3)')
-                : 'rgba(168, 124, 42, 0.3)'
+              backgroundColor: `${accentColor}1A`, // 10% opacity
+              borderColor: `${accentColor}4D` // 30% opacity
             }}
             aria-label="Menú"
           >
@@ -117,12 +98,11 @@ export default function MobileNavbar() {
       {/* Menú Desplegable lateral */}
       <div
         className={`fixed top-0 right-0 h-full w-64 border-l shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
-          isLightTheme ? 'bg-deepBlack' : 'bg-coffeeBlack'
-        } ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
-          borderColor: 'rgba(212, 175, 55, 0.3)',
+          backgroundColor: currentTheme.colors.surface,
+          borderColor: `${accentColor}4D`, // 30% opacity
           borderWidth: '1px'
         }}
       >
