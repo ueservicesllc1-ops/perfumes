@@ -122,9 +122,8 @@ export default function MobileNavbar() {
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
-          borderColor: 'var(--theme-border)',
-          borderWidth: '1px',
-          borderOpacity: 0.3
+          borderColor: 'rgba(212, 175, 55, 0.3)',
+          borderWidth: '1px'
         }}
       >
         <div className="p-6 pt-20">

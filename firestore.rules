@@ -83,6 +83,58 @@ service cloud.firestore {
       allow delete: if request.auth != null;
     }
     
+    // Reglas para la colección de horarios disponibles
+    match /availability/{slotId} {
+      // Permitir lectura pública (cualquiera puede ver los horarios disponibles)
+      allow read: if true;
+      
+      // TEMPORAL: Permitir creación/actualización sin autenticación para el admin
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow create: if request.resource.data.keys().hasAll(['date', 'time', 'available'])
+        && request.resource.data.date is string
+        && request.resource.data.time is string
+        && request.resource.data.available is bool
+        && (!('createdAt' in request.resource.data) || request.resource.data.createdAt is timestamp)
+        && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
+      
+      allow update: if request.resource.data.keys().hasAll(['date', 'time', 'available'])
+        && request.resource.data.date is string
+        && request.resource.data.time is string
+        && request.resource.data.available is bool
+        && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
+      
+      // TEMPORAL: Permitir eliminación sin autenticación para el admin
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow delete: if true;
+    }
+    
+    // Reglas para la colección de citas
+    match /appointments/{appointmentId} {
+      // Los usuarios autenticados pueden leer sus propias citas
+      allow read: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // TEMPORAL: Permitir lectura sin autenticación para el admin
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow read: if true;
+      
+      // TEMPORAL: Permitir creación sin autenticación (para usuarios guest)
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'phone', 'date', 'time', 'status'])
+        && request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.phone is string
+        && request.resource.data.date is string
+        && request.resource.data.time is string
+        && request.resource.data.status is string;
+      
+      // TEMPORAL: Permitir actualización sin autenticación para el admin
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow update: if true;
+      
+      allow delete: if request.auth != null;
+    }
+    
     // Denegar acceso a todo lo demás por defecto
     match /{document=**} {
       allow read, write: if false;

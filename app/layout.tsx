@@ -3,7 +3,6 @@ import './globals.css'
 import RegisterSW from './register-sw'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { CartProvider } from '@/contexts/CartContext'
-import Cart from '@/components/Cart'
 
 export const metadata: Metadata = {
   title: 'Arabiyat - App Móvil',
@@ -41,7 +40,6 @@ export default function RootLayout({
         <ThemeProvider>
           <CartProvider>
             {children}
-            <Cart />
             <RegisterSW />
           </CartProvider>
         </ThemeProvider>

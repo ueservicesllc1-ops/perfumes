@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PerfumeImage from '@/components/PerfumeImage'
@@ -38,7 +39,7 @@ export default function ProductoDetalle() {
 
   if (loading) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#172621', color: '#FFFFFF' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
         <Header />
         <div style={{ marginTop: '50px' }} className="flex items-center justify-center min-h-[60vh]">
           <p style={{ color: '#999' }}>Cargando...</p>
@@ -50,14 +51,14 @@ export default function ProductoDetalle() {
 
   if (!perfume) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#172621', color: '#FFFFFF' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
         <Header />
         <div style={{ marginTop: '50px' }} className="flex flex-col items-center justify-center min-h-[60vh] px-4">
           <p className="text-lg mb-4" style={{ color: '#999' }}>Producto no encontrado</p>
           <button
             onClick={() => router.push('/catalogo')}
             className="px-6 py-2 rounded-lg text-white font-medium"
-            style={{ backgroundColor: '#172621' }}
+            style={{ backgroundColor: '#000000' }}
           >
             Volver al catálogo
           </button>
@@ -85,19 +86,30 @@ export default function ProductoDetalle() {
           </button>
 
           {/* Imagen grande del producto */}
-          <div className="mb-6 rounded-lg p-4" style={{ backgroundColor: '#2a2a2a' }}>
-            <div className="h-64 relative">
+          <motion.div 
+            className="mb-6 rounded-lg p-4" 
+            style={{ backgroundColor: '#344A3D' }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <motion.div 
+              className="h-64 relative"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+            >
               <PerfumeImage 
                 imageUrl={perfume.imageUrl} 
                 perfumeName={perfume.name}
                 className="h-64 object-contain"
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Información del producto */}
           <div className="mb-6">
-            <h1 className="text-xl font-bold mb-2" style={{ color: '#FFFFFF' }}>
+            <h1 className="text-xl font-bold mb-2" style={{ color: '#F8F5EF' }}>
               {perfume.name}
             </h1>
 
@@ -123,7 +135,7 @@ export default function ProductoDetalle() {
               {perfume.size && (
                 <div>
                   <p className="text-sm font-medium mb-1" style={{ color: '#D4AF37' }}>Tamaño:</p>
-                  <p className="text-base" style={{ color: '#FFFFFF' }}>{perfume.size}</p>
+                  <p className="text-base" style={{ color: '#F8F5EF' }}>{perfume.size}</p>
                 </div>
               )}
 
@@ -135,7 +147,7 @@ export default function ProductoDetalle() {
               {perfume.brand && (
                 <div>
                   <p className="text-sm font-medium mb-1" style={{ color: '#D4AF37' }}>Marca:</p>
-                  <p className="text-base" style={{ color: '#FFFFFF' }}>{perfume.brand}</p>
+                  <p className="text-base" style={{ color: '#F8F5EF' }}>{perfume.brand}</p>
                 </div>
               )}
 
@@ -157,7 +169,7 @@ export default function ProductoDetalle() {
             </div>
 
             {/* Botón agregar al carrito */}
-            <button
+            <motion.button
               disabled={!perfume.inStock}
               onClick={() => {
                 if (perfume.inStock) {
@@ -165,7 +177,7 @@ export default function ProductoDetalle() {
                   alert('Producto agregado al carrito')
                 }
               }}
-              className={`w-full py-3 rounded-lg text-base font-semibold transition-all active:scale-95 ${
+              className={`w-full py-3 rounded-lg text-base font-semibold ${
                 perfume.inStock
                   ? ''
                   : 'cursor-not-allowed opacity-50'
@@ -177,9 +189,18 @@ export default function ProductoDetalle() {
                 backgroundColor: '#2a2a2a',
                 color: '#666',
               }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              whileHover={perfume.inStock ? { 
+                scale: 1.05,
+                boxShadow: '0 8px 20px rgba(212, 175, 55, 0.5)',
+                transition: { duration: 0.3 }
+              } : {}}
+              whileTap={perfume.inStock ? { scale: 0.95 } : {}}
             >
               {perfume.inStock ? 'Agregar al carrito' : 'Agotado'}
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>

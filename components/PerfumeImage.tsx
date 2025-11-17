@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 import { getImageUrl } from '@/lib/b2/storage'
 
 interface PerfumeImageProps {
@@ -38,16 +39,28 @@ export default function PerfumeImage({ imageUrl, perfumeName, className = 'h-48'
     : getImageUrl(imageUrl)
 
   return (
-    <div className={`${className} relative overflow-hidden`} style={{ backgroundColor: '#1a1a1a' }}>
-      <Image
-        src={imageSrc}
-        alt={perfumeName}
-        fill
-        className="object-contain p-1"
-        sizes="(max-width: 384px) 100vw, 384px"
-        unoptimized
-      />
-    </div>
+    <motion.div 
+      className={`${className} relative overflow-hidden`} 
+      style={{ backgroundColor: '#344A3D' }}
+      whileHover={{ scale: 1.05 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full h-full"
+      >
+        <Image
+          src={imageSrc}
+          alt={perfumeName}
+          fill
+          className="object-contain p-1"
+          sizes="(max-width: 384px) 100vw, 384px"
+          unoptimized
+        />
+      </motion.div>
+    </motion.div>
   )
 }
 

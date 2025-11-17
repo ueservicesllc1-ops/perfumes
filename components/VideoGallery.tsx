@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import type { Video } from '@/lib/firebase/videos'
 import { getImageUrl } from '@/lib/b2/storage'
 import VideoModal from './VideoModal'
@@ -23,7 +24,7 @@ export default function VideoGallery({ videos }: VideoGalleryProps) {
     <>
       <section className="px-4 -mt-2 pb-6">
         <div className="flex gap-3 justify-center">
-          {displayVideos.map((video) => {
+          {displayVideos.map((video, index) => {
             const thumbnailUrl = video.thumbnailUrl 
               ? (video.thumbnailUrl.startsWith('/api/b2') 
                   ? video.thumbnailUrl 
@@ -31,15 +32,24 @@ export default function VideoGallery({ videos }: VideoGalleryProps) {
               : null
 
             return (
-              <button
+              <motion.button
                 key={video.id}
                 onClick={() => setSelectedVideo(video)}
                 className="flex-shrink-0 w-[calc(33.333%-8px)] aspect-[9/16] rounded-lg overflow-hidden relative group"
                 style={{
-                  backgroundColor: '#2a2a2a',
+                  backgroundColor: '#344A3D',
                   border: 'none',
                   cursor: 'pointer',
                 }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ 
+                  scale: 1.05,
+                  y: -8,
+                  transition: { duration: 0.3 }
+                }}
+                whileTap={{ scale: 0.95 }}
               >
                 {thumbnailUrl ? (
                   <img
@@ -79,7 +89,7 @@ export default function VideoGallery({ videos }: VideoGalleryProps) {
                     {video.title}
                   </p>
                 </div>
-              </button>
+              </motion.button>
             )
           })}
         </div>

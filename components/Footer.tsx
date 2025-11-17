@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { useCart } from '@/contexts/CartContext'
 
 export default function Footer() {
   const pathname = usePathname()
-  const { openCart, totalItems } = useCart()
+  const { totalItems } = useCart()
 
   const navItems = [
     {
@@ -28,16 +29,13 @@ export default function Footer() {
       ),
     },
     {
-      href: '#',
+      href: '/carrito',
       label: 'Carrito',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
       ),
-      onClick: () => {
-        openCart()
-      },
       badge: totalItems > 0 ? totalItems : undefined,
     },
     {
@@ -52,7 +50,7 @@ export default function Footer() {
   ]
 
   return (
-    <footer 
+    <motion.footer 
       className="w-full fixed bottom-0 left-0 right-0 z-50"
       style={{ 
         backgroundColor: '#000000',
@@ -61,29 +59,35 @@ export default function Footer() {
         minHeight: '60px',
         boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.5)',
       }}
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
     >
       <div className="max-w-sm mx-auto">
         <nav className="flex items-center justify-around">
           {navItems.map((item) => {
             const isActive = pathname === item.href
             const content = (
-              <div className="flex flex-col items-center gap-1 relative">
-                <div
-                  style={{
-                    color: isActive ? '#D4AF37' : '#FFFFFF',
-                    opacity: isActive ? 1 : 0.7,
-                  }}
-                >
-                  {item.icon}
+              <div className="flex flex-col items-center gap-1">
+                <div className="relative inline-block">
+                  <div
+                    style={{
+                      color: isActive ? '#D4AF37' : '#F8F5EF',
+                      opacity: isActive ? 1 : 0.7,
+                    }}
+                  >
+                    {item.icon}
+                  </div>
                   {item.badge && item.badge > 0 && (
                     <span
-                      className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-[10px] font-bold"
+                      className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-[10px] font-bold z-10"
                       style={{
                         backgroundColor: '#D4AF37',
                         color: '#000000',
                         minWidth: '18px',
                         height: '18px',
                         padding: '0 4px',
+                        lineHeight: '18px',
                       }}
                     >
                       {item.badge > 9 ? '9+' : item.badge}
@@ -93,7 +97,7 @@ export default function Footer() {
                 <span
                   className="text-[10px] font-medium"
                   style={{
-                    color: isActive ? '#D4AF37' : '#FFFFFF',
+                    color: isActive ? '#D4AF37' : '#F8F5EF',
                     opacity: isActive ? 1 : 0.7,
                   }}
                 >
@@ -102,32 +106,24 @@ export default function Footer() {
               </div>
             )
 
-            if (item.onClick) {
-              return (
-                <button
-                  key={item.label}
-                  onClick={item.onClick}
-                  className="flex-1 flex items-center justify-center transition-all active:scale-95"
-                  style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+            return (
+              <motion.div
+                key={item.label}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Link
+                  href={item.href}
+                  className="flex-1 flex items-center justify-center"
                 >
                   {content}
-                </button>
-              )
-            }
-
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex-1 flex items-center justify-center transition-all active:scale-95"
-              >
-                {content}
-              </Link>
+                </Link>
+              </motion.div>
             )
           })}
         </nav>
       </div>
-    </footer>
+    </motion.footer>
   )
 }
 

@@ -19,11 +19,11 @@ export async function generateOrderPDF(orderData: {
   // Título
   doc.setFontSize(22)
   doc.setTextColor(0, 0, 0)
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('ORDEN DE COMPRA', pageWidth / 2, yPos, { align: 'center' })
   yPos += 10
   doc.setFontSize(14)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   doc.text('ARABIYAT PRESTIGE', pageWidth / 2, yPos, { align: 'center' })
   yPos += 15
 
@@ -35,10 +35,10 @@ export async function generateOrderPDF(orderData: {
 
   // Número de orden y fecha
   doc.setFontSize(12)
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text(`Número de Orden: ${orderData.orderId}`, 20, yPos)
   yPos += 8
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   const now = new Date()
   doc.text(`Fecha: ${now.toLocaleDateString('es-ES', { 
     year: 'numeric', 
@@ -51,64 +51,64 @@ export async function generateOrderPDF(orderData: {
 
   // Información de envío
   doc.setFontSize(14)
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('INFORMACIÓN DE ENVÍO Y CONTACTO', 20, yPos)
   yPos += 10
   doc.setFontSize(11)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   
   // Nombre completo
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('Nombre Completo:', 20, yPos)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   doc.text(orderData.shippingInfo.fullName, 70, yPos)
   yPos += 8
   
   // Email
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('Email:', 20, yPos)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   doc.text(orderData.shippingInfo.email, 70, yPos)
   yPos += 8
   
   // Teléfono
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('Teléfono:', 20, yPos)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   doc.text(orderData.shippingInfo.phone, 70, yPos)
   yPos += 8
   
   // Dirección
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('Dirección:', 20, yPos)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   const addressLines = doc.splitTextToSize(orderData.shippingInfo.address, pageWidth - 80)
   doc.text(addressLines, 70, yPos)
   yPos += addressLines.length * 7
   
   // Ciudad, Estado, Código Postal
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('Ciudad:', 20, yPos)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   doc.text(orderData.shippingInfo.city, 70, yPos)
   yPos += 8
   
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('Estado:', 20, yPos)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   doc.text(orderData.shippingInfo.state, 70, yPos)
   yPos += 8
   
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('Código Postal:', 20, yPos)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   doc.text(orderData.shippingInfo.zipCode, 70, yPos)
   yPos += 8
   
   // País
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('País:', 20, yPos)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
   doc.text(orderData.shippingInfo.country, 70, yPos)
   yPos += 15
 
@@ -120,11 +120,11 @@ export async function generateOrderPDF(orderData: {
 
   // Productos
   doc.setFontSize(14)
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text('DETALLES DE PRODUCTOS', 20, yPos)
   yPos += 10
   doc.setFontSize(10)
-  doc.setFont(undefined, 'normal')
+  doc.setFont('helvetica', 'normal')
 
   orderData.items.forEach((item, index) => {
     if (yPos > pageHeight - 40) {
@@ -133,13 +133,13 @@ export async function generateOrderPDF(orderData: {
     }
 
     // Número y nombre del producto
-    doc.setFont(undefined, 'bold')
+    doc.setFont('helvetica', 'bold')
     doc.text(`${index + 1}. ${item.name}`, 20, yPos)
     yPos += 7
     
     // Tamaño si existe
     if (item.size) {
-      doc.setFont(undefined, 'normal')
+      doc.setFont('helvetica', 'normal')
       doc.text(`   Tamaño: ${item.size}`, 20, yPos)
       yPos += 6
     }
@@ -151,7 +151,7 @@ export async function generateOrderPDF(orderData: {
     yPos += 6
     
     // Subtotal
-    doc.setFont(undefined, 'bold')
+    doc.setFont('helvetica', 'bold')
     const subtotal = item.price * item.quantity
     doc.text(`   Subtotal: $${subtotal.toFixed(2)}`, 20, yPos)
     yPos += 10
@@ -174,13 +174,13 @@ export async function generateOrderPDF(orderData: {
 
   // Total
   doc.setFontSize(14)
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text(`TOTAL A PAGAR: $${orderData.total.toFixed(2)}`, pageWidth - 20, yPos, { align: 'right' })
   yPos += 15
 
   // Nota final
   doc.setFontSize(9)
-  doc.setFont(undefined, 'italic')
+  doc.setFont('helvetica', 'italic')
   doc.setTextColor(100, 100, 100)
   doc.text('Gracias por su compra. Esta orden será procesada y enviada a la dirección indicada.', 20, yPos, {
     maxWidth: pageWidth - 40,

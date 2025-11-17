@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PerfumeImage from '@/components/PerfumeImage'
@@ -12,6 +13,7 @@ import type { Perfume } from '@/lib/firebase/perfumes'
 export default function Catalogo() {
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos')
   const [selectedBrand, setSelectedBrand] = useState<string>('Todas')
+  const [selectedCollection, setSelectedCollection] = useState<string>('Todas')
   const [showCategoryMenu, setShowCategoryMenu] = useState(false)
   const [showBrandMenu, setShowBrandMenu] = useState(false)
   const { perfumes, loading, error } = usePerfumes(selectedCategory)
@@ -82,8 +84,6 @@ export default function Catalogo() {
 
   const categories = ['Todos', 'For Her', 'For Him', 'For Both']
 
-  const [selectedCollection, setSelectedCollection] = useState<string>('Todas')
-
   // Función para extraer la marca del nombre del perfume
   const getBrandFromName = (name: string): string => {
     if (name.includes('Arabiyat Prestige')) {
@@ -145,35 +145,46 @@ export default function Catalogo() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#172621', color: '#FFFFFF' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
       <Header />
       
       <main className="max-w-sm mx-auto pt-16 px-4 pb-24">
         {/* Título */}
-        <section className="mb-6">
-          <h1 className="text-2xl font-bold text-center mb-2" style={{ color: '#D4AF37' }}>
+        <motion.section 
+          className="mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.h1 
+            className="text-2xl font-bold text-center mb-2" 
+            style={{ color: '#D4AF37' }}
+            whileHover={{ scale: 1.05 }}
+          >
             Catálogo de Perfumes
-          </h1>
-        </section>
+          </motion.h1>
+        </motion.section>
 
         {/* Botones de Filtro - Unidos */}
         <section className="mb-4">
           <div className="flex">
             {/* Botón Categorías */}
             <div className="flex-1 relative" ref={categoryMenuRef}>
-              <button
+              <motion.button
                 onClick={() => {
                   setShowCategoryMenu(!showCategoryMenu)
                   setShowBrandMenu(false)
                 }}
-                className="w-full px-4 py-3 rounded-none text-sm font-medium transition-all active:scale-95"
+                className="w-full px-4 py-3 rounded-none text-sm font-medium"
                 style={selectedCategory !== 'Todos' ? {
                   backgroundColor: '#D4AF37',
                   color: '#000000',
                 } : {
-                  backgroundColor: '#2a2a2a',
+                  backgroundColor: '#344A3D',
                   color: '#D4AF37',
                 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 Categorías
                 <svg 
@@ -184,14 +195,14 @@ export default function Catalogo() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </motion.button>
               
               {/* Menú desplegable de Categorías */}
               {showCategoryMenu && (
                 <div 
                   className="absolute top-full left-0 right-0 z-20 mt-1 rounded-none overflow-hidden"
                   style={{ 
-                    backgroundColor: '#2a2a2a',
+                    backgroundColor: '#344A3D',
                     border: '1px solid #D4AF37',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
                   }}
@@ -208,7 +219,7 @@ export default function Catalogo() {
                         backgroundColor: '#D4AF37',
                         color: '#000000',
                       } : {
-                        backgroundColor: '#2a2a2a',
+                        backgroundColor: '#344A3D',
                         color: '#D4AF37',
                       }}
                     >
@@ -221,19 +232,21 @@ export default function Catalogo() {
 
             {/* Botón Marcas */}
             <div className="flex-1 relative" ref={brandMenuRef}>
-              <button
+              <motion.button
                 onClick={() => {
                   setShowBrandMenu(!showBrandMenu)
                   setShowCategoryMenu(false)
                 }}
-                className="w-full px-4 py-3 rounded-none text-sm font-medium transition-all active:scale-95"
+                className="w-full px-4 py-3 rounded-none text-sm font-medium"
                 style={selectedBrand !== 'Todas' ? {
                   backgroundColor: '#D4AF37',
                   color: '#000000',
                 } : {
-                  backgroundColor: '#2a2a2a',
+                  backgroundColor: '#344A3D',
                   color: '#D4AF37',
                 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 Marcas
                 <svg 
@@ -244,14 +257,14 @@ export default function Catalogo() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </motion.button>
               
               {/* Menú desplegable de Marcas */}
               {showBrandMenu && (
                 <div 
                   className="absolute top-full left-0 right-0 z-20 mt-1 rounded-none overflow-hidden max-h-64 overflow-y-auto"
                   style={{ 
-                    backgroundColor: '#2a2a2a',
+                    backgroundColor: '#344A3D',
                     border: '1px solid #D4AF37',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
                   }}
@@ -268,7 +281,7 @@ export default function Catalogo() {
                         backgroundColor: '#D4AF37',
                         color: '#000000',
                       } : {
-                        backgroundColor: '#2a2a2a',
+                        backgroundColor: '#344A3D',
                         color: '#D4AF37',
                       }}
                     >
@@ -285,23 +298,28 @@ export default function Catalogo() {
         {selectedBrand !== 'Todas' && collections.length > 1 && (
           <section className="mb-6">
             <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
-              {collections.map((collection) => (
-                <button
+              {collections.map((collection, index) => (
+                <motion.button
                   key={collection}
                   onClick={() => setSelectedCollection(collection)}
-                  className="px-4 py-2 rounded-none text-sm font-medium whitespace-nowrap transition-all active:scale-95"
+                  className="px-4 py-2 rounded-none text-sm font-medium whitespace-nowrap"
                   style={selectedCollection === collection ? {
                     backgroundColor: '#D4AF37',
                     color: '#000000',
                     boxShadow: '0 2px 8px rgba(212, 175, 55, 0.4)'
                   } : {
-                    backgroundColor: '#2a2a2a',
+                    backgroundColor: '#344A3D',
                     color: '#D4AF37',
                     border: '1px solid rgba(212, 175, 55, 0.3)'
                   }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {collection}
-                </button>
+                </motion.button>
               ))}
             </div>
           </section>
@@ -333,108 +351,116 @@ export default function Catalogo() {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
-                {filteredPerfumes.map((perfume) => (
-                  <Link
+                {filteredPerfumes.map((perfume, index) => (
+                  <motion.div
                     key={perfume.id}
-                    href={`/producto/${perfume.id}`}
-                    className="block overflow-hidden rounded-lg active:scale-[0.98] transition-all h-full flex flex-col"
-                    style={{ 
-                      backgroundColor: '#2a2a2a',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = '0 8px 20px rgba(212, 175, 55, 0.4)'
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                    }}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    {/* Imagen del perfume */}
-                    <div className="h-32 relative" style={{ backgroundColor: '#1a1a1a' }}>
-                      <PerfumeImage 
-                        imageUrl={perfume.imageUrl} 
-                        perfumeName={perfume.name}
-                        className="h-32"
-                      />
-                      {!perfume.inStock && (
-                        <div className="absolute top-1 right-1 z-10">
-                          <span 
-                            className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full"
-                            style={{ 
-                              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                              color: '#D4AF37',
-                              border: '1px solid #D4AF37'
-                            }}
-                          >
-                            Agotado
-                          </span>
-                        </div>
-                      )}
-                      {perfume.originalPrice && (
-                        <div className="absolute top-1 left-1 z-10">
-                          <span 
-                            className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full"
-                            style={{ 
-                              backgroundColor: '#D4AF37',
-                              color: '#000000'
-                            }}
-                          >
-                            Oferta
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Información del perfume */}
-                    <div className="p-2 flex-1 flex flex-col justify-between min-h-[80px]">
-                      <h3 className="font-medium text-[10px] mb-1 line-clamp-2 leading-tight" style={{ color: '#FFFFFF' }}>
-                        {perfume.name}
-                      </h3>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center space-x-1 flex-wrap">
-                          <span className="text-[11px] font-bold" style={{ color: '#D4AF37' }}>
-                            ${perfume.price.toFixed(2)}
-                          </span>
+                    <motion.div
+                      whileHover={{ 
+                        y: -8,
+                        scale: 1.02,
+                        boxShadow: '0 12px 30px rgba(212, 175, 55, 0.4)',
+                        transition: { duration: 0.3 }
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Link
+                        href={`/producto/${perfume.id}`}
+                        className="block overflow-hidden rounded-lg h-full flex flex-col"
+                        style={{ 
+                          backgroundColor: '#344A3D',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                        }}
+                      >
+                        {/* Imagen del perfume */}
+                        <div className="h-32 relative" style={{ backgroundColor: '#344A3D' }}>
+                          <PerfumeImage 
+                            imageUrl={perfume.imageUrl} 
+                            perfumeName={perfume.name}
+                            className="h-32"
+                          />
+                          {!perfume.inStock && (
+                            <div className="absolute top-1 right-1 z-10">
+                              <span 
+                                className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full"
+                                style={{ 
+                                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                  color: '#D4AF37',
+                                  border: '1px solid #D4AF37'
+                                }}
+                              >
+                                Agotado
+                              </span>
+                            </div>
+                          )}
                           {perfume.originalPrice && (
-                            <span className="text-[9px] line-through" style={{ color: '#666' }}>
-                              ${perfume.originalPrice.toFixed(2)}
-                            </span>
+                            <div className="absolute top-1 left-1 z-10">
+                              <span 
+                                className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full"
+                                style={{ 
+                                  backgroundColor: '#D4AF37',
+                                  color: '#000000'
+                                }}
+                              >
+                                Oferta
+                              </span>
+                            </div>
                           )}
                         </div>
-                        <button
-                          disabled={!perfume.inStock}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            if (perfume.inStock) {
-                              addToCart(perfume)
-                            }
-                          }}
-                          className={`px-2 py-1 rounded text-[9px] font-medium transition-all ${
-                            perfume.inStock
-                              ? 'active:scale-95'
-                              : 'cursor-not-allowed'
-                          }`}
-                          style={perfume.inStock ? {
-                            backgroundColor: '#D4AF37',
-                            color: '#000000',
-                            whiteSpace: 'nowrap',
-                            border: 'none',
-                            cursor: 'pointer'
-                          } : {
-                            backgroundColor: '#333',
-                            color: '#666',
-                            whiteSpace: 'nowrap',
-                            border: 'none'
-                          }}
-                        >
-                          {perfume.inStock ? 'Agregar' : 'Agotado'}
-                        </button>
-                      </div>
-                    </div>
-                  </Link>
+
+                        {/* Información del perfume */}
+                        <div className="p-2 flex-1 flex flex-col justify-between min-h-[80px]">
+                          <h3 className="font-medium text-[10px] mb-1 line-clamp-2 leading-tight" style={{ color: '#F8F5EF' }}>
+                            {perfume.name}
+                          </h3>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center space-x-1 flex-wrap">
+                              <span className="text-[11px] font-bold" style={{ color: '#D4AF37' }}>
+                                ${perfume.price.toFixed(2)}
+                              </span>
+                              {perfume.originalPrice && (
+                                <span className="text-[9px] line-through" style={{ color: '#666' }}>
+                                  ${perfume.originalPrice.toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              disabled={!perfume.inStock}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                if (perfume.inStock) {
+                                  addToCart(perfume)
+                                }
+                              }}
+                              className={`px-2 py-1 rounded text-[9px] font-medium transition-all ${
+                                perfume.inStock
+                                  ? 'active:scale-95'
+                                  : 'cursor-not-allowed'
+                              }`}
+                              style={perfume.inStock ? {
+                                backgroundColor: '#D4AF37',
+                                color: '#000000',
+                                whiteSpace: 'nowrap',
+                                border: 'none',
+                                cursor: 'pointer'
+                              } : {
+                                backgroundColor: '#333',
+                                color: '#666',
+                                whiteSpace: 'nowrap',
+                                border: 'none'
+                              }}
+                            >
+                              {perfume.inStock ? 'Agregar' : 'Agotado'}
+                            </button>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  </motion.div>
                 ))}
               </div>
             )}
@@ -453,4 +479,3 @@ export default function Catalogo() {
     </div>
   )
 }
-

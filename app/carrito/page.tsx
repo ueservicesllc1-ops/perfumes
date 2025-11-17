@@ -1,41 +1,35 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 import { useCart } from '@/contexts/CartContext'
 import PerfumeImage from '@/components/PerfumeImage'
 
-export default function Cart() {
-  const { items, removeFromCart, updateQuantity, clearCart, totalPrice, isOpen, closeCart, minimumOrderAmount, meetsMinimumOrder } = useCart()
-
-  if (!isOpen) return null
+export default function CarritoPage() {
+  const router = useRouter()
+  const { items, removeFromCart, updateQuantity, clearCart, totalPrice, minimumOrderAmount, meetsMinimumOrder } = useCart()
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 bg-black/50 z-50 transition-opacity duration-300"
-        onClick={closeCart}
-      />
-
-      {/* Carrito */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl max-h-[85vh] flex flex-col" style={{ 
-        backgroundColor: '#182B21',
-        borderTop: '1px solid #D4AF37',
-        boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.5)'
-      }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
+      <Header />
+      
+      <main className="max-w-sm mx-auto pt-16 px-4 pb-32">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: '#D4AF37' }}>
-          <h2 className="text-xl font-bold" style={{ color: '#D4AF37' }}>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold" style={{ color: '#D4AF37' }}>
             Carrito de Compras
-          </h2>
+          </h1>
           <button
-            onClick={closeCart}
+            onClick={() => router.back()}
             className="p-2 rounded-lg transition-all active:scale-95"
             style={{
               backgroundColor: '#344A3D',
               color: '#D4AF37',
             }}
-            aria-label="Cerrar carrito"
+            aria-label="Volver"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -44,7 +38,7 @@ export default function Cart() {
         </div>
 
         {/* Lista de items */}
-        <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="mb-6">
           {items.length === 0 ? (
             <div className="text-center py-12">
               <svg
@@ -56,19 +50,38 @@ export default function Cart() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              <p className="text-sm" style={{ color: '#999' }}>
+              <p className="text-sm mb-6" style={{ color: '#6B5D4F' }}>
                 Tu carrito está vacío
               </p>
+              <Link
+                href="/catalogo"
+                className="inline-block px-6 py-3 rounded-lg font-semibold text-center transition-all active:scale-95"
+                style={{
+                  backgroundColor: '#D4AF37',
+                  color: '#000000',
+                }}
+              >
+                Ir al Catálogo
+              </Link>
             </div>
           ) : (
             <div className="space-y-4">
-              {items.map((item) => (
-                <div
+              {items.map((item, index) => (
+                <motion.div
                   key={item.id}
                   className="flex gap-3 p-3 rounded-lg"
                   style={{
                     backgroundColor: '#344A3D',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    y: -4,
+                    boxShadow: '0 8px 20px rgba(212, 175, 55, 0.4)',
+                    transition: { duration: 0.3 }
                   }}
                 >
                   {/* Imagen */}
@@ -86,7 +99,7 @@ export default function Cart() {
                       {item.name}
                     </h3>
                     {item.size && (
-                      <p className="text-xs mb-2" style={{ color: '#999' }}>
+                      <p className="text-xs mb-2" style={{ color: '#6B5D4F' }}>
                         {item.size}
                       </p>
                     )}
@@ -133,14 +146,14 @@ export default function Cart() {
                     
                     {/* Subtotal */}
                     <div className="flex items-center justify-between">
-                      <span className="text-xs" style={{ color: '#999' }}>
+                      <span className="text-xs" style={{ color: '#6B5D4F' }}>
                         Subtotal: ${(item.price * item.quantity).toFixed(2)}
                       </span>
                       <button
                         onClick={() => removeFromCart(item.id!)}
                         className="text-xs px-2 py-1 rounded transition-all active:scale-95"
                         style={{
-                          color: '#999',
+                          color: '#6B5D4F',
                         }}
                         aria-label="Eliminar producto"
                       >
@@ -148,7 +161,7 @@ export default function Cart() {
                       </button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
@@ -156,7 +169,10 @@ export default function Cart() {
 
         {/* Footer con total y botón de checkout */}
         {items.length > 0 && (
-          <div className="p-4 border-t space-y-3" style={{ borderColor: '#D4AF37' }}>
+          <div className="p-4 rounded-lg space-y-3" style={{ 
+                    backgroundColor: '#344A3D',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+          }}>
             {/* Mensaje de mínimo de compra */}
             {!meetsMinimumOrder && (
               <div className="p-3 rounded-lg border" style={{
@@ -180,8 +196,8 @@ export default function Cart() {
               </span>
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={clearCart}
+              <Link
+                href="/catalogo"
                 className="flex-1 px-4 py-3 rounded-lg font-semibold text-center transition-all active:scale-95 border"
                 style={{
                   backgroundColor: 'transparent',
@@ -189,12 +205,11 @@ export default function Cart() {
                   borderColor: '#D4AF37',
                 }}
               >
-                Vaciar Carrito
-              </button>
+                Seguir Comprando
+              </Link>
               <Link
                 href="/checkout"
-                onClick={closeCart}
-                className={`flex-1 px-4 py-3 rounded-lg font-semibold text-center transition-all ${meetsMinimumOrder ? 'active:scale-95' : 'opacity-50 cursor-not-allowed'}`}
+                className={`flex-1 px-4 py-3 rounded-lg font-semibold text-center transition-all ${meetsMinimumOrder ? 'active:scale-95' : 'opacity-50 cursor-not-allowed pointer-events-none'}`}
                 style={{
                   backgroundColor: meetsMinimumOrder ? '#D4AF37' : '#666',
                   color: meetsMinimumOrder ? '#000000' : '#FFFFFF',
@@ -205,8 +220,10 @@ export default function Cart() {
             </div>
           </div>
         )}
-      </div>
-    </>
+      </main>
+
+      <Footer />
+    </div>
   )
 }
 

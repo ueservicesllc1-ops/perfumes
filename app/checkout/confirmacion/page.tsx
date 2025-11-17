@@ -1,12 +1,12 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 
-export default function Confirmacion() {
+function ConfirmacionContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const orderId = searchParams.get('orderId')
@@ -32,7 +32,7 @@ export default function Confirmacion() {
   }, [orderId, router])
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#172621', color: '#FFFFFF' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
       <Header />
       
       <main className="max-w-sm mx-auto pt-16 px-4 pb-24">
@@ -67,10 +67,10 @@ export default function Confirmacion() {
           )}
 
           <div className="p-4 rounded-lg mb-6" style={{
-            backgroundColor: '#2a2a2a',
+            backgroundColor: '#344A3D',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
           }}>
-            <p className="text-sm mb-2" style={{ color: '#FFFFFF' }}>
+            <p className="text-sm mb-2" style={{ color: '#F8F5EF' }}>
               Recibirás un email de confirmación con los detalles de tu orden.
             </p>
             <p className="text-xs" style={{ color: '#999' }}>
@@ -111,6 +111,21 @@ export default function Confirmacion() {
 
       <Footer />
     </div>
+  )
+}
+
+export default function Confirmacion() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#182B21' }}>
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#D4AF37' }}></div>
+          <p className="mt-4" style={{ color: '#D4AF37' }}>Cargando...</p>
+        </div>
+      </div>
+    }>
+      <ConfirmacionContent />
+    </Suspense>
   )
 }
 

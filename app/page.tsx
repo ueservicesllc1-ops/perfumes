@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import BannerCarousel from '@/components/BannerCarousel'
@@ -19,23 +20,52 @@ export default function Home() {
     : []
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#172621', color: '#FFFFFF' }}>
+    <motion.div 
+      className="min-h-screen" 
+      style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <Header />
       <div style={{ marginTop: '35px' }}>
-        <BannerCarousel />
-        <ActionButtons />
-        <div className="px-4 pt-2 pb-2">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <BannerCarousel />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <ActionButtons />
+        </motion.div>
+        <motion.div 
+          className="px-4 pt-2 pb-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
           <ProductCarousel 
             products={newPerfumes}
             title="Productos Nuevos"
           />
-        </div>
-        <VideoGallery videos={videos} />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+        >
+          <VideoGallery videos={videos} />
+        </motion.div>
       </div>
       <div className="pb-32">
         {/* Contenido aquí */}
       </div>
       <Footer />
-    </div>
+    </motion.div>
   )
 }

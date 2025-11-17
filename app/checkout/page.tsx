@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { useCart } from '@/contexts/CartContext'
@@ -166,7 +167,7 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#172621', color: '#FFFFFF' }}>
+      <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
         <Header />
         <main className="max-w-sm mx-auto pt-16 px-4 pb-24">
           <div className="text-center py-12">
@@ -175,14 +176,14 @@ export default function Checkout() {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              style={{ color: '#999' }}
+                style={{ color: '#6B5D4F' }}
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            <h2 className="text-xl font-bold mb-2" style={{ color: '#FFFFFF' }}>
+            <h2 className="text-xl font-bold mb-2" style={{ color: '#F8F5EF' }}>
               Carrito Vacío
             </h2>
-            <p className="text-sm mb-6" style={{ color: '#999' }}>
+            <p className="text-sm mb-6" style={{ color: '#6B5D4F' }}>
               No hay productos en tu carrito
             </p>
             <button
@@ -203,7 +204,7 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#172621', color: '#FFFFFF' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
       <Header />
       
       <main className="max-w-sm mx-auto pt-16 px-4 pb-24">
@@ -212,23 +213,30 @@ export default function Checkout() {
           <h1 className="text-2xl font-bold mb-2" style={{ color: '#D4AF37' }}>
             Finalizar Compra
           </h1>
-          <p className="text-sm" style={{ color: '#999' }}>
+          <p className="text-sm" style={{ color: '#6B5D4F' }}>
             Completa tu información para procesar la orden
           </p>
         </section>
 
         {/* Resumen de la Orden */}
         <section className="mb-6 p-4 rounded-lg" style={{
-          backgroundColor: '#2a2a2a',
+          backgroundColor: '#344A3D',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
         }}>
           <h2 className="text-lg font-bold mb-4" style={{ color: '#D4AF37' }}>
             Resumen de la Orden
           </h2>
           <div className="space-y-3 mb-4">
-            {items.map((item) => (
-              <div key={item.id} className="flex gap-3">
-                <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden" style={{ backgroundColor: '#1a1a1a' }}>
+            {items.map((item, index) => (
+              <motion.div 
+                key={item.id} 
+                className="flex gap-3"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ scale: 1.02, x: 4 }}
+              >
+                <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden" style={{ backgroundColor: '#344A3D' }}>
                   <PerfumeImage
                     imageUrl={item.imageUrl}
                     perfumeName={item.name}
@@ -236,11 +244,11 @@ export default function Checkout() {
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm mb-1 line-clamp-1" style={{ color: '#FFFFFF' }}>
+                  <h3 className="font-semibold text-sm mb-1 line-clamp-1" style={{ color: '#F8F5EF' }}>
                     {item.name}
                   </h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs" style={{ color: '#999' }}>
+                    <span className="text-xs" style={{ color: '#6B5D4F' }}>
                       Cantidad: {item.quantity}
                     </span>
                     <span className="text-sm font-bold" style={{ color: '#D4AF37' }}>
@@ -248,7 +256,7 @@ export default function Checkout() {
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
           <div className="pt-4 border-t" style={{ borderColor: '#D4AF37' }}>
@@ -267,7 +275,7 @@ export default function Checkout() {
               </div>
             )}
             <div className="flex items-center justify-between">
-              <span className="text-lg font-semibold" style={{ color: '#FFFFFF' }}>
+              <span className="text-lg font-semibold" style={{ color: '#F8F5EF' }}>
                 Total:
               </span>
               <span className="text-2xl font-bold" style={{ color: '#D4AF37' }}>
@@ -297,9 +305,9 @@ export default function Checkout() {
                   required
                   className="w-full px-4 py-2.5 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: '#2a2a2a',
+                    backgroundColor: '#344A3D',
                     borderColor: '#D4AF37',
-                    color: '#FFFFFF',
+                    color: '#F8F5EF',
                   }}
                 />
               </div>
@@ -316,9 +324,9 @@ export default function Checkout() {
                   required
                   className="w-full px-4 py-2.5 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: '#2a2a2a',
+                    backgroundColor: '#344A3D',
                     borderColor: '#D4AF37',
-                    color: '#FFFFFF',
+                    color: '#F8F5EF',
                   }}
                 />
               </div>
@@ -335,9 +343,9 @@ export default function Checkout() {
                   required
                   className="w-full px-4 py-2.5 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: '#2a2a2a',
+                    backgroundColor: '#344A3D',
                     borderColor: '#D4AF37',
-                    color: '#FFFFFF',
+                    color: '#F8F5EF',
                   }}
                 />
               </div>
@@ -354,9 +362,9 @@ export default function Checkout() {
                   required
                   className="w-full px-4 py-2.5 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: '#2a2a2a',
+                    backgroundColor: '#344A3D',
                     borderColor: '#D4AF37',
-                    color: '#FFFFFF',
+                    color: '#F8F5EF',
                   }}
                 />
               </div>
@@ -374,9 +382,9 @@ export default function Checkout() {
                     required
                     className="w-full px-4 py-2.5 rounded-lg border transition-all"
                     style={{
-                      backgroundColor: '#2a2a2a',
+                      backgroundColor: '#344A3D',
                       borderColor: '#D4AF37',
-                      color: '#FFFFFF',
+                      color: '#F8F5EF',
                     }}
                   />
                 </div>
@@ -393,9 +401,9 @@ export default function Checkout() {
                     required
                     className="w-full px-4 py-2.5 rounded-lg border transition-all"
                     style={{
-                      backgroundColor: '#2a2a2a',
+                      backgroundColor: '#344A3D',
                       borderColor: '#D4AF37',
-                      color: '#FFFFFF',
+                      color: '#F8F5EF',
                     }}
                   />
                 </div>
@@ -414,9 +422,9 @@ export default function Checkout() {
                     required
                     className="w-full px-4 py-2.5 rounded-lg border transition-all"
                     style={{
-                      backgroundColor: '#2a2a2a',
+                      backgroundColor: '#344A3D',
                       borderColor: '#D4AF37',
-                      color: '#FFFFFF',
+                      color: '#F8F5EF',
                     }}
                   />
                 </div>
@@ -432,9 +440,9 @@ export default function Checkout() {
                     required
                     className="w-full px-4 py-2.5 rounded-lg border transition-all"
                     style={{
-                      backgroundColor: '#2a2a2a',
+                      backgroundColor: '#344A3D',
                       borderColor: '#D4AF37',
-                      color: '#FFFFFF',
+                      color: '#F8F5EF',
                     }}
                   >
                     <option value="Estados Unidos">Estados Unidos</option>

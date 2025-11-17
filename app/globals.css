@@ -168,9 +168,9 @@ body {
 }
 
 body {
-  background: #172621;
+  background: #182B21;
   background-attachment: fixed;
-  color: #FFFFFF;
+  color: #F8F5EF;
   /* Prevenir zoom en iOS al hacer focus en inputs */
   touch-action: manipulation;
   transition: background-color 0.3s ease, color 0.3s ease;

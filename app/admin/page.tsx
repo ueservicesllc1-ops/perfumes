@@ -5,14 +5,18 @@ import { useRouter } from 'next/navigation'
 import { signIn, signInWithGoogle, getCurrentUser, logOut } from '@/lib/firebase/auth'
 import { getAllPerfumes } from '@/lib/firebase/perfumes'
 import { getAllVideos } from '@/lib/firebase/videos'
+import { getAvailableSlots, deleteAvailableSlot } from '@/lib/firebase/availability'
 import type { Perfume } from '@/lib/firebase/perfumes'
 import type { Video } from '@/lib/firebase/videos'
+import type { AvailableSlot } from '@/lib/firebase/availability'
 import AdminProductList from '@/components/admin/AdminProductList'
 import AdminProductForm from '@/components/admin/AdminProductForm'
 import AdminVideoList from '@/components/admin/AdminVideoList'
 import AdminVideoForm from '@/components/admin/AdminVideoForm'
+import AdminAvailabilityList from '@/components/admin/AdminAvailabilityList'
+import AdminAvailabilityForm from '@/components/admin/AdminAvailabilityForm'
 
-type AdminSection = 'menu' | 'products' | 'videos'
+type AdminSection = 'menu' | 'products' | 'videos' | 'availability'
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null)
@@ -28,6 +32,9 @@ export default function AdminPage() {
   const [videos, setVideos] = useState<Video[]>([])
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [showVideoForm, setShowVideoForm] = useState(false)
+  const [slots, setSlots] = useState<AvailableSlot[]>([])
+  const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null)
+  const [showAvailabilityForm, setShowAvailabilityForm] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -40,6 +47,8 @@ export default function AdminPage() {
         loadPerfumes()
       } else if (section === 'videos') {
         loadVideos()
+      } else if (section === 'availability') {
+        loadSlots()
       }
     }
   }, [user, section])
@@ -96,6 +105,9 @@ export default function AdminPage() {
       setVideos([])
       setSelectedVideo(null)
       setShowVideoForm(false)
+      setSlots([])
+      setSelectedSlot(null)
+      setShowAvailabilityForm(false)
       setSection('menu')
     } catch (error) {
       console.error('Error al cerrar sesión:', error)
@@ -117,6 +129,15 @@ export default function AdminPage() {
       setVideos(data)
     } catch (error) {
       console.error('Error cargando videos:', error)
+    }
+  }
+
+  async function loadSlots() {
+    try {
+      const data = await getAvailableSlots()
+      setSlots(data)
+    } catch (error) {
+      console.error('Error cargando horarios:', error)
     }
   }
 
@@ -160,9 +181,38 @@ export default function AdminPage() {
     handleVideoFormClose()
   }
 
+  function handleEditSlot(slot: AvailableSlot) {
+    setSelectedSlot(slot)
+    setShowAvailabilityForm(true)
+  }
+
+  function handleNewSlot(date?: string) {
+    setSelectedSlot(null)
+    setShowAvailabilityForm(true)
+    // If date is provided, we'll set it in the form via a prop or state
+    if (date) {
+      // Store the date temporarily to pre-fill the form
+      setSelectedSlot({ date, time: '09:00', available: true } as AvailableSlot)
+    }
+  }
+
+  function handleAvailabilityFormClose() {
+    setShowAvailabilityForm(false)
+    setSelectedSlot(null)
+  }
+
+  function handleAvailabilityFormSuccess() {
+    loadSlots()
+    handleAvailabilityFormClose()
+  }
+
+  async function handleDeleteSlot(id: string) {
+    await deleteAvailableSlot(id)
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#172621' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#182B21' }}>
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#D4AF37' }}></div>
           <p className="mt-4" style={{ color: '#D4AF37' }}>Cargando...</p>
@@ -297,8 +347,10 @@ export default function AdminPage() {
                   setSection('menu')
                   setShowProductForm(false)
                   setShowVideoForm(false)
+                  setShowAvailabilityForm(false)
                   setSelectedPerfume(null)
                   setSelectedVideo(null)
+                  setSelectedSlot(null)
                 }}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
                 style={{ backgroundColor: '#2a2a2a', color: '#D4AF37', border: '1px solid #444' }}
@@ -324,9 +376,24 @@ export default function AdminPage() {
                 + Nuevo
               </button>
             )}
-            {(showProductForm || showVideoForm) && (
+            {section === 'availability' && !showAvailabilityForm && (
               <button
-                onClick={showProductForm ? handleProductFormClose : handleVideoFormClose}
+                onClick={() => handleNewSlot()}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
+                style={{ backgroundColor: '#D4AF37', color: '#000000' }}
+              >
+                + Nuevo
+              </button>
+            )}
+            {(showProductForm || showVideoForm || showAvailabilityForm) && (
+              <button
+                onClick={
+                  showProductForm 
+                    ? handleProductFormClose 
+                    : showVideoForm 
+                    ? handleVideoFormClose 
+                    : handleAvailabilityFormClose
+                }
                 className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
                 style={{ backgroundColor: '#2a2a2a', color: '#D4AF37', border: '1px solid #444' }}
               >
@@ -381,6 +448,20 @@ export default function AdminPage() {
               </svg>
               <span className="text-lg">Videos</span>
             </button>
+            <button
+              onClick={() => setSection('availability')}
+              className="w-full py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+              style={{ 
+                backgroundColor: '#2a2a2a', 
+                border: '2px solid #D4AF37',
+                color: '#D4AF37'
+              }}
+            >
+              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="text-lg">Horarios</span>
+            </button>
           </div>
         ) : section === 'products' ? (
           showProductForm ? (
@@ -408,6 +489,22 @@ export default function AdminPage() {
               videos={videos}
               onEdit={handleEditVideo}
               onRefresh={loadVideos}
+            />
+          )
+        ) : section === 'availability' ? (
+          showAvailabilityForm ? (
+            <AdminAvailabilityForm
+              slot={selectedSlot}
+              onClose={handleAvailabilityFormClose}
+              onSuccess={handleAvailabilityFormSuccess}
+            />
+          ) : (
+            <AdminAvailabilityList
+              slots={slots}
+              onEdit={handleEditSlot}
+              onDelete={handleDeleteSlot}
+              onRefresh={loadSlots}
+              onNewSlot={handleNewSlot}
             />
           )
         ) : null}

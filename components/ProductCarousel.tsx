@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import PerfumeImage from '@/components/PerfumeImage'
 import { useCart } from '@/contexts/CartContext'
 import type { Perfume } from '@/lib/firebase/perfumes'
@@ -68,30 +69,34 @@ export default function ProductCarousel({ products, title }: ProductCarouselProp
                   key={slideIndex}
                   className="min-w-full w-full flex-shrink-0 flex gap-2 px-2"
                 >
-                  {slideProducts.map((perfume) => (
-                    <div
+                  {slideProducts.map((perfume, idx) => (
+                    <motion.div
                       key={perfume.id}
                       className="w-[calc(50%-4px)] flex-shrink-0"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: idx * 0.1 }}
                     >
-                      <Link
-                        href={`/producto/${perfume.id}`}
-                        className="block overflow-hidden active:scale-[0.98] transition-all rounded-lg h-full flex flex-col group"
-                        style={{ 
-                          backgroundColor: '#2a2a2a',
-                          border: 'none',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                      <motion.div
+                        whileHover={{ 
+                          y: -8,
+                          scale: 1.02,
+                          boxShadow: '0 12px 30px rgba(212, 175, 55, 0.4)',
+                          transition: { duration: 0.3 }
                         }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.boxShadow = '0 8px 20px rgba(212, 175, 55, 0.4)'
-                          e.currentTarget.style.transform = 'translateY(-2px)'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)'
-                          e.currentTarget.style.transform = 'translateY(0)'
-                        }}
+                        whileTap={{ scale: 0.98 }}
                       >
+                        <Link
+                          href={`/producto/${perfume.id}`}
+                          className="block overflow-hidden rounded-lg h-full flex flex-col group"
+                          style={{ 
+                            backgroundColor: '#344A3D',
+                            border: 'none',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+                          }}
+                        >
                         {/* Imagen del perfume */}
-                        <div className="h-32 w-full relative flex items-center justify-center" style={{ backgroundColor: '#1a1a1a' }}>
+                        <div className="h-32 w-full relative flex items-center justify-center" style={{ backgroundColor: '#344A3D' }}>
                           <PerfumeImage 
                             imageUrl={perfume.imageUrl} 
                             perfumeName={perfume.name}
@@ -112,7 +117,7 @@ export default function ProductCarousel({ products, title }: ProductCarouselProp
 
                         {/* Información del perfume - Solo nombre y precio */}
                         <div className="p-2 flex-1 flex flex-col justify-between min-h-[80px]">
-                          <h3 className="font-medium text-[10px] mb-1 line-clamp-2 leading-tight" style={{ color: '#FFFFFF' }}>
+                          <h3 className="font-medium text-[10px] mb-1 line-clamp-2 leading-tight" style={{ color: '#F8F5EF' }}>
                             {perfume.name}
                           </h3>
                           <div className="flex items-center justify-between gap-2">
@@ -145,8 +150,9 @@ export default function ProductCarousel({ products, title }: ProductCarouselProp
                             </button>
                           </div>
                         </div>
-                      </Link>
-                    </div>
+                        </Link>
+                      </motion.div>
+                    </motion.div>
                   ))}
                   {/* Si hay un número impar de productos, agregar un espacio vacío para mantener el centrado */}
                   {slideProducts.length === 1 && (
