@@ -239,6 +239,30 @@ export function createWhatsAppMessage(orderData: {
 // Función para abrir WhatsApp con el mensaje
 export function openWhatsApp(phoneNumber: string, message: string) {
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`
-  window.open(whatsappUrl, '_blank')
+  
+  // Abrir WhatsApp en nueva pestaña/ventana
+  // Como esta función se llama desde la página de confirmación (ya cargada),
+  // no debería haber problemas con bloqueadores de popups
+  try {
+    const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+    
+    // Si window.open fue bloqueado, intentar con un pequeño delay
+    // Esto puede ayudar en algunos navegadores
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      // Intentar de nuevo después de un breve delay
+      setTimeout(() => {
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+      }, 100)
+    }
+  } catch (error) {
+    console.error('Error opening WhatsApp:', error)
+    // Como último recurso, intentar abrir directamente
+    // Nota: Esto redirigirá la página actual, pero es mejor que no abrir nada
+    try {
+      window.location.href = whatsappUrl
+    } catch (fallbackError) {
+      console.error('Error with fallback WhatsApp opening:', fallbackError)
+    }
+  }
 }
 

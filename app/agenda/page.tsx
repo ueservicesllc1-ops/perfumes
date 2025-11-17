@@ -51,7 +51,20 @@ export default function AgendaPage() {
     setLoading(true)
     try {
       const slots = await getAvailableSlotsByDate(date)
-      const times = slots.map(slot => slot.time).sort()
+      // Extraer solo la hora (número) de cada slot (formato "HH:00" -> "HH")
+      const hours = slots
+        .map(slot => {
+          // Si el formato es "HH:00", extraer solo "HH"
+          const hourMatch = slot.time.match(/^(\d+):/)
+          return hourMatch ? parseInt(hourMatch[1], 10) : null
+        })
+        .filter((hour): hour is number => hour !== null)
+      
+      // Eliminar duplicados y ordenar
+      const uniqueHours = Array.from(new Set(hours)).sort((a, b) => a - b)
+      
+      // Convertir a strings para mantener consistencia con el estado
+      const times = uniqueHours.map(hour => hour.toString())
       setAvailableTimes(times)
       setSelectedTime('')
     } catch (error) {
@@ -75,12 +88,15 @@ export default function AgendaPage() {
     }
 
     try {
+      // Convertir la hora seleccionada (número) al formato "HH:00" para guardar en la BD
+      const timeFormatted = `${selectedTime.padStart(2, '0')}:00`
+      
       await createAppointment({
         name,
         email,
         phone,
         date: selectedDate,
-        time: selectedTime,
+        time: timeFormatted,
         notes: notes || undefined
       })
 

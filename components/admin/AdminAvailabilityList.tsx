@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { addAvailableSlot } from '@/lib/firebase/availability'
+import { addAvailableSlot, updateAvailableSlot } from '@/lib/firebase/availability'
 import type { AvailableSlot } from '@/lib/firebase/availability'
 
 interface AdminAvailabilityListProps {
@@ -26,28 +26,26 @@ export default function AdminAvailabilityList({
   const [saving, setSaving] = useState(false)
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
-  // Generate hourly time ranges (9-10, 10-11, 11-12, etc.)
+  // Generate hourly time slots (9, 10, 11, 12, etc.)
   const generateTimeSlots = () => {
-    const ranges: string[] = []
+    const hours: string[] = []
     for (let hour = 9; hour < 18; hour++) {
-      const range = `${hour}-${hour + 1}`
-      ranges.push(range)
+      hours.push(hour.toString())
     }
-    return ranges
+    return hours
   }
 
   const allTimeSlots = generateTimeSlots()
 
-  // Convert range to time format for storage (e.g., "9-10" -> "09:00")
-  const rangeToTime = (range: string) => {
-    const hour = parseInt(range.split('-')[0])
-    return `${hour.toString().padStart(2, '0')}:00`
+  // Convert hour to time format for storage (e.g., "9" -> "09:00")
+  const hourToTime = (hour: string) => {
+    return `${hour.padStart(2, '0')}:00`
   }
 
-  // Convert time to range format (e.g., "09:00" -> "9-10")
-  const timeToRange = (time: string) => {
+  // Convert time to hour format (e.g., "09:00" -> "9")
+  const timeToHour = (time: string) => {
     const hour = parseInt(time.split(':')[0])
-    return `${hour}-${hour + 1}`
+    return hour.toString()
   }
 
   // Calendar functions
@@ -105,11 +103,17 @@ export default function AdminAvailabilityList({
     const dateStr = getDateString(day)
     setSelectedDate(dateStr)
     
-    // Load existing times for this date and convert to ranges
-    const existingSlots = slots.filter(slot => slot.date === dateStr && slot.available)
-    const existingRanges = existingSlots.map(slot => timeToRange(slot.time))
-    // Remove duplicates and sort
-    setSelectedTimes(Array.from(new Set(existingRanges)).sort())
+    // Load existing times for this date (both available and unavailable)
+    const existingSlots = slots.filter(slot => slot.date === dateStr)
+    // Only show available slots as selected
+    const availableSlots = existingSlots.filter(slot => slot.available)
+    const existingHours = availableSlots.map(slot => timeToHour(slot.time))
+    // Remove duplicates and sort numerically
+    const uniqueHours = Array.from(new Set(existingHours))
+      .map(h => parseInt(h, 10))
+      .sort((a, b) => a - b)
+      .map(h => h.toString())
+    setSelectedTimes(uniqueHours)
   }
 
   const toggleTime = (time: string) => {
@@ -126,50 +130,80 @@ export default function AdminAvailabilityList({
     return selectedTimes.includes(time)
   }
 
-  const isTimeExisting = (range: string) => {
+  const isTimeExisting = (hour: string) => {
     if (!selectedDate) return false
-    const time = rangeToTime(range)
+    const time = hourToTime(hour)
     return slots.some(slot => slot.date === selectedDate && slot.time === time)
   }
 
+  const isTimeAvailable = (hour: string) => {
+    if (!selectedDate) return false
+    const time = hourToTime(hour)
+    const slot = slots.find(slot => slot.date === selectedDate && slot.time === time)
+    return slot ? slot.available : false
+  }
+
+  const getSlotId = (hour: string) => {
+    if (!selectedDate) return null
+    const time = hourToTime(hour)
+    const slot = slots.find(slot => slot.date === selectedDate && slot.time === time)
+    return slot?.id || null
+  }
+
   async function handleSaveTimes() {
-    if (!selectedDate || selectedTimes.length === 0) return
+    if (!selectedDate) {
+      alert('Por favor selecciona una fecha')
+      return
+    }
 
     setSaving(true)
     try {
       // Get existing slots for this date
       const existingSlots = slots.filter(slot => slot.date === selectedDate)
-      const existingRanges = existingSlots.map(slot => timeToRange(slot.time))
       const existingTimes = existingSlots.map(slot => slot.time)
 
-      // Convert selected ranges to times
-      const selectedTimesConverted = selectedTimes.map(range => rangeToTime(range))
+      // Convert selected hours to times
+      const selectedTimesConverted = selectedTimes.map(hour => hourToTime(hour))
 
-      // Add new slots
-      for (const range of selectedTimes) {
-        const time = rangeToTime(range)
-        if (!existingTimes.includes(time)) {
-          await addAvailableSlot({
-            date: selectedDate,
-            time,
-            available: true
-          })
-        }
-      }
+      // Process all time slots (9-17)
+      for (const hour of allTimeSlots) {
+        const time = hourToTime(hour)
+        const slotId = getSlotId(hour)
+        const isSelected = selectedTimes.includes(hour)
+        const exists = existingTimes.includes(time)
 
-      // Delete slots that are no longer selected
-      for (const slot of existingSlots) {
-        const slotRange = timeToRange(slot.time)
-        if (!selectedTimes.includes(slotRange) && slot.id) {
-          await onDelete(slot.id)
+        if (isSelected) {
+          // Activate or create slot
+          if (exists && slotId) {
+            // Update existing slot to available
+            const existingSlot = existingSlots.find(s => s.id === slotId)
+            if (existingSlot && !existingSlot.available) {
+              await updateAvailableSlot(slotId, { available: true })
+            }
+          } else {
+            // Create new slot
+            await addAvailableSlot({
+              date: selectedDate,
+              time,
+              available: true
+            })
+          }
+        } else {
+          // Deactivate slot (don't delete, just mark as unavailable)
+          if (exists && slotId) {
+            const existingSlot = existingSlots.find(s => s.id === slotId)
+            if (existingSlot && existingSlot.available) {
+              await updateAvailableSlot(slotId, { available: false })
+            }
+          }
         }
       }
 
       await onRefresh()
-      alert('Horarios guardados exitosamente')
+      alert('Horarios actualizados exitosamente')
     } catch (error) {
       console.error('Error saving times:', error)
-      alert('Error al guardar los horarios')
+      alert('Error al actualizar los horarios')
     } finally {
       setSaving(false)
     }
@@ -323,15 +357,16 @@ export default function AdminAvailabilityList({
 
             {/* Time Grid */}
             <div className="grid grid-cols-3 gap-2 mb-4">
-              {allTimeSlots.map(range => {
-                const isSelected = isTimeSelected(range)
-                const isExisting = isTimeExisting(range)
+              {allTimeSlots.map(hour => {
+                const isSelected = isTimeSelected(hour)
+                const isExisting = isTimeExisting(hour)
+                const isAvailable = isTimeAvailable(hour)
 
                 return (
                   <motion.button
-                    key={range}
+                    key={hour}
                     type="button"
-                    onClick={() => toggleTime(range)}
+                    onClick={() => toggleTime(hour)}
                     className="px-4 py-3 rounded-lg text-sm font-medium transition-all"
                     style={
                       isSelected
@@ -339,6 +374,14 @@ export default function AdminAvailabilityList({
                             backgroundColor: '#D4AF37',
                             color: '#000000',
                             boxShadow: '0 2px 8px rgba(212, 175, 55, 0.4)'
+                          }
+                        : isExisting && !isAvailable
+                        ? {
+                            backgroundColor: '#1a1a1a',
+                            color: '#666',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            opacity: 0.5,
+                            textDecoration: 'line-through'
                           }
                         : {
                             backgroundColor: '#1a1a1a',
@@ -349,7 +392,7 @@ export default function AdminAvailabilityList({
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {range}
+                    {hour}
                   </motion.button>
                 )
               })}
@@ -358,18 +401,23 @@ export default function AdminAvailabilityList({
             {/* Save Button */}
             <motion.button
               onClick={handleSaveTimes}
-              disabled={saving || selectedTimes.length === 0}
+              disabled={saving}
               className="w-full py-3 rounded-lg font-medium transition-all"
               style={{
-                backgroundColor: saving || selectedTimes.length === 0 ? '#666' : '#D4AF37',
+                backgroundColor: saving ? '#666' : '#D4AF37',
                 color: '#000000',
-                opacity: saving || selectedTimes.length === 0 ? 0.6 : 1
+                opacity: saving ? 0.6 : 1
               }}
               whileHover={{ scale: saving ? 1 : 1.02 }}
               whileTap={{ scale: saving ? 1 : 0.98 }}
             >
-              {saving ? 'Guardando...' : `Guardar ${selectedTimes.length} hora${selectedTimes.length !== 1 ? 's' : ''}`}
+              {saving ? 'Actualizando...' : 'Actualizar Citas'}
             </motion.button>
+            {selectedTimes.length > 0 && (
+              <p className="text-xs text-center mt-2" style={{ color: '#999' }}>
+                {selectedTimes.length} hora{selectedTimes.length !== 1 ? 's' : ''} activa{selectedTimes.length !== 1 ? 's' : ''}
+              </p>
+            )}
           </div>
         </motion.div>
       )}

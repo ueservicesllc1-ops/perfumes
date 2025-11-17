@@ -134,10 +134,11 @@ export default function Checkout() {
           pdfUrl: fullPdfUrl,
         })
 
-        // Abrir WhatsApp con el mensaje que incluye el link del PDF
-        setTimeout(() => {
-          openWhatsApp(whatsappConfig.phoneNumber, whatsappMessage)
-        }, 500)
+        // Guardar mensaje de WhatsApp en sessionStorage para abrirlo en la página de confirmación
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('whatsappMessage', whatsappMessage)
+          sessionStorage.setItem('whatsappPhone', whatsappConfig.phoneNumber)
+        }
       } catch (pdfError) {
         console.error('Error generating/uploading PDF:', pdfError)
         // Continuar aunque falle el PDF, pero sin el link
@@ -148,9 +149,12 @@ export default function Checkout() {
           shippingInfo,
           pdfUrl: null,
         })
-        setTimeout(() => {
-          openWhatsApp(whatsappConfig.phoneNumber, whatsappMessage)
-        }, 500)
+        
+        // Guardar mensaje de WhatsApp en sessionStorage para abrirlo en la página de confirmación
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('whatsappMessage', whatsappMessage)
+          sessionStorage.setItem('whatsappPhone', whatsappConfig.phoneNumber)
+        }
       }
 
       // Limpiar el carrito

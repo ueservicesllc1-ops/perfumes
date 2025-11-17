@@ -5,17 +5,37 @@ import { useEffect, useState, Suspense } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import { openWhatsApp } from '@/lib/utils/pdfGenerator'
 
 function ConfirmacionContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const orderId = searchParams.get('orderId')
   const [countdown, setCountdown] = useState(5)
+  const [whatsappOpened, setWhatsappOpened] = useState(false)
 
   useEffect(() => {
     if (!orderId) {
       router.push('/')
       return
+    }
+
+    // Abrir WhatsApp si hay un mensaje guardado en sessionStorage
+    if (typeof window !== 'undefined' && !whatsappOpened) {
+      const whatsappMessage = sessionStorage.getItem('whatsappMessage')
+      const whatsappPhone = sessionStorage.getItem('whatsappPhone')
+      
+      if (whatsappMessage && whatsappPhone) {
+        // Abrir WhatsApp inmediatamente
+        openWhatsApp(whatsappPhone, whatsappMessage)
+        setWhatsappOpened(true)
+        
+        // Limpiar sessionStorage después de un breve delay
+        setTimeout(() => {
+          sessionStorage.removeItem('whatsappMessage')
+          sessionStorage.removeItem('whatsappPhone')
+        }, 1000)
+      }
     }
 
     const timer = setInterval(() => {
@@ -29,7 +49,7 @@ function ConfirmacionContent() {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [orderId, router])
+  }, [orderId, router, whatsappOpened])
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
