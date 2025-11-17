@@ -61,6 +61,28 @@ export default function Home() {
         >
           <VideoGallery videos={videos} />
         </motion.div>
+        <motion.div
+          className="px-4 py-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+        >
+          <motion.button
+            className="w-full py-6 rounded-lg font-bold text-lg"
+            style={{
+              backgroundColor: '#D4AF37',
+              color: '#000000',
+            }}
+            whileHover={{ 
+              scale: 1.02,
+              boxShadow: '0 8px 24px rgba(212, 175, 55, 0.4)',
+            }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+          >
+            Envíos Internacionales
+          </motion.button>
+        </motion.div>
       </div>
       <div className="pb-32">
         {/* Contenido aquí */}
