@@ -9,10 +9,12 @@ import ProductCarousel from '@/components/ProductCarousel'
 import VideoGallery from '@/components/VideoGallery'
 import { usePerfumes } from '@/hooks/usePerfumes'
 import { useVideos } from '@/hooks/useVideos'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Home() {
   const { perfumes, loading } = usePerfumes()
   const { videos } = useVideos()
+  const { t } = useLanguage()
 
   // Obtener productos nuevos (últimos 6 disponibles)
   const newPerfumes = perfumes.length > 0
@@ -51,7 +53,7 @@ export default function Home() {
         >
           <ProductCarousel 
             products={newPerfumes}
-            title="Productos Nuevos"
+            title={t('home.newProducts')}
           />
         </motion.div>
         <motion.div
@@ -80,7 +82,7 @@ export default function Home() {
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.2 }}
           >
-            Envíos Internacionales
+            {t('home.internationalShipping')}
           </motion.button>
         </motion.div>
       </div>

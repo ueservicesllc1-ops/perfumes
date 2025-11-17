@@ -3,9 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { RectangleStackIcon, StarIcon, TicketIcon } from '@heroicons/react/24/outline'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ActionButtons() {
   const router = useRouter()
+  const { t } = useLanguage()
   
   return (
     <div className="w-full px-4 py-4" style={{ backgroundColor: '#182B21', marginTop: '-20px' }}>
@@ -40,7 +42,7 @@ export default function ActionButtons() {
             />
           </motion.div>
           <span className="text-xs font-medium tracking-wide uppercase" style={{ color: '#D4AF37', letterSpacing: '0.08em' }}>
-            Colección
+            {t('home.collection')}
           </span>
         </motion.button>
 
@@ -73,7 +75,7 @@ export default function ActionButtons() {
             />
           </motion.div>
           <span className="text-xs font-medium tracking-wide uppercase" style={{ color: '#D4AF37', letterSpacing: '0.08em' }}>
-            Nuevo
+            {t('home.new')}
           </span>
         </motion.button>
 
@@ -106,7 +108,7 @@ export default function ActionButtons() {
             />
           </motion.div>
           <span className="text-xs font-medium tracking-wide uppercase" style={{ color: '#D4AF37', letterSpacing: '0.08em' }}>
-            Ofertas
+            {t('home.offers')}
           </span>
         </motion.button>
       </div>

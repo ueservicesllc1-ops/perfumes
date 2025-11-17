@@ -61,6 +61,22 @@ const translations: Record<Language, Record<string, string>> = {
     'checkout.country': 'País',
     'checkout.confirm': 'Confirmar Orden',
     
+    // Home
+    'home.newProducts': 'Productos Nuevos',
+    'home.internationalShipping': 'Envíos Internacionales',
+    'home.collection': 'Colección',
+    'home.new': 'Nuevo',
+    'home.offers': 'Ofertas',
+    
+    // Catálogo
+    'catalog.title': 'Catálogo de Perfumes',
+    'catalog.allCategories': 'Todos',
+    'catalog.allBrands': 'Todas',
+    'catalog.allCollections': 'Todas',
+    'catalog.categories': 'Categorías',
+    'catalog.brands': 'Marcas',
+    'catalog.collections': 'Colecciones',
+    
     // Otros
     'button.download': 'Descargar',
     'button.close': 'Cerrar',
@@ -113,6 +129,22 @@ const translations: Record<Language, Record<string, string>> = {
     'checkout.zip': 'Zip Code',
     'checkout.country': 'Country',
     'checkout.confirm': 'Confirm Order',
+    
+    // Home
+    'home.newProducts': 'New Products',
+    'home.internationalShipping': 'International Shipping',
+    'home.collection': 'Collection',
+    'home.new': 'New',
+    'home.offers': 'Offers',
+    
+    // Catalog
+    'catalog.title': 'Perfume Catalog',
+    'catalog.allCategories': 'All',
+    'catalog.allBrands': 'All',
+    'catalog.allCollections': 'All',
+    'catalog.categories': 'Categories',
+    'catalog.brands': 'Brands',
+    'catalog.collections': 'Collections',
     
     // Others
     'button.download': 'Download',

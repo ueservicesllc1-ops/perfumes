@@ -8,9 +8,11 @@ import Footer from '@/components/Footer'
 import PerfumeImage from '@/components/PerfumeImage'
 import { usePerfumes } from '@/hooks/usePerfumes'
 import { useCart } from '@/contexts/CartContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import type { Perfume } from '@/lib/firebase/perfumes'
 
 export default function Catalogo() {
+  const { t } = useLanguage()
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos')
   const [selectedBrand, setSelectedBrand] = useState<string>('Todas')
   const [selectedCollection, setSelectedCollection] = useState<string>('Todas')
@@ -161,7 +163,7 @@ export default function Catalogo() {
             style={{ color: '#D4AF37' }}
             whileHover={{ scale: 1.05 }}
           >
-            Catálogo de Perfumes
+            {t('catalog.title')}
           </motion.h1>
         </motion.section>
 
@@ -186,7 +188,7 @@ export default function Catalogo() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Categorías
+                {t('catalog.categories')}
                 <svg 
                   className={`w-4 h-4 inline-block ml-2 transition-transform ${showCategoryMenu ? 'rotate-180' : ''}`}
                   fill="none" 
@@ -223,7 +225,7 @@ export default function Catalogo() {
                         color: '#D4AF37',
                       }}
                     >
-                      {cat}
+                      {cat === 'Todos' ? t('catalog.allCategories') : cat}
                     </button>
                   ))}
                 </div>
@@ -248,7 +250,7 @@ export default function Catalogo() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Marcas
+                {t('catalog.brands')}
                 <svg 
                   className={`w-4 h-4 inline-block ml-2 transition-transform ${showBrandMenu ? 'rotate-180' : ''}`}
                   fill="none" 
@@ -285,7 +287,7 @@ export default function Catalogo() {
                         color: '#D4AF37',
                       }}
                     >
-                      {brand}
+                      {brand === 'Todas' ? t('catalog.allBrands') : brand}
                     </button>
                   ))}
                 </div>
@@ -318,7 +320,7 @@ export default function Catalogo() {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {collection}
+                  {collection === 'Todas' ? t('catalog.allCollections') : collection}
                 </motion.button>
               ))}
             </div>
