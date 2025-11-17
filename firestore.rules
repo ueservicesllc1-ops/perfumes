@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Reglas para la colección de perfumes
+    match /perfumes/{perfumeId} {
+      // Permitir lectura pública (cualquiera puede ver los perfumes)
+      allow read: if true;
+      
+      // TEMPORAL: Permitir creación sin autenticación para poblar base de datos
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow create: if request.resource.data.keys().hasAll(['name', 'price', 'category', 'inStock'])
+        && request.resource.data.name is string
+        && request.resource.data.price is number
+        && request.resource.data.category in ['For Her', 'For Him', 'For Both']
+        && request.resource.data.inStock is bool;
+      
+      // TEMPORAL: Permitir actualización sin autenticación para actualizar imágenes
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow update: if (!request.resource.data.diff(request.resource.data).affectedKeys().hasAny(['createdAt']));
+      
+      allow delete: if request.auth != null;
+    }
+    
+    // Reglas para usuarios
+    match /users/{userId} {
+      // Los usuarios solo pueden leer/escribir su propio perfil
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Reglas para favoritos
+    match /favorites/{favoriteId} {
+      // Los usuarios solo pueden leer/escribir sus propios favoritos
+      allow read, write: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Reglas para carrito
+    match /cart/{cartId} {
+      // Los usuarios solo pueden leer/escribir su propio carrito
+      allow read, write: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Reglas para pedidos
+    match /orders/{orderId} {
+      // Los usuarios solo pueden leer sus propios pedidos (si están autenticados)
+      allow read: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // TEMPORAL: Permitir crear pedidos sin autenticación (para usuarios guest)
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow create: if request.resource.data.keys().hasAll(['userId', 'items', 'total', 'status', 'shippingInfo', 'paymentMethod'])
+        && request.resource.data.userId is string
+        && request.resource.data.items is list
+        && request.resource.data.total is number
+        && request.resource.data.status is string
+        && request.resource.data.shippingInfo is map
+        && request.resource.data.paymentMethod is string;
+    }
+    
+    // Reglas para la colección de videos
+    match /videos/{videoId} {
+      // Permitir lectura pública (cualquiera puede ver los videos)
+      allow read: if true;
+      
+      // TEMPORAL: Permitir creación sin autenticación para poblar base de datos
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow create: if request.resource.data.keys().hasAll(['title', 'videoUrl'])
+        && request.resource.data.title is string
+        && request.resource.data.videoUrl is string;
+      
+      // TEMPORAL: Permitir actualización sin autenticación
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow update: if true;
+      
+      allow delete: if request.auth != null;
+    }
+    
+    // Denegar acceso a todo lo demás por defecto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
