@@ -98,10 +98,13 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
             ref={videoRef}
             src={videoUrl}
             controls
+            playsInline
+            preload="metadata"
             className="w-full h-full"
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
             onClick={(e) => e.stopPropagation()}
+            {...{ 'webkit-playsinline': 'true' } as any}
           >
             Tu navegador no soporta la reproducción de videos.
           </video>
