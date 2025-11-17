@@ -146,7 +146,11 @@ service cloud.firestore {
         && request.resource.data.title is string
         && request.resource.data.fileUrl is string
         && request.resource.data.fileType is string
-        && request.resource.data.fileName is string;
+        && request.resource.data.fileName is string
+        && (!('description' in request.resource.data) || request.resource.data.description is string)
+        && (!('order' in request.resource.data) || request.resource.data.order is int)
+        && (!('thumbnailUrl' in request.resource.data) || request.resource.data.thumbnailUrl is string)
+        && (!('fileSize' in request.resource.data) || request.resource.data.fileSize is int);
       
       // TEMPORAL: Permitir actualización sin autenticación
       // IMPORTANTE: Revertir esto en producción y usar solo con autenticación

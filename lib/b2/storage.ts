@@ -12,28 +12,12 @@ export async function uploadPerfumeImage(file: File, perfumeId: string): Promise
     formData.append('file', file)
     formData.append('path', `perfumes/${perfumeId}/${Date.now()}-${file.name}`)
 
-    // Usar proxy externo en puerto 3001
-    const proxyUrl = 'http://localhost:3001'
-    const uploadEndpoint = `${proxyUrl}/api/b2/upload`
-    
-    // Intentar con proxy externo primero
-    let response
-    try {
-      response = await fetch(uploadEndpoint, {
-        method: 'POST',
-        body: formData,
-        // No incluir headers automáticamente para evitar error 431
-        headers: {},
-      })
-    } catch (proxyError: any) {
-      // Si falla el proxy externo, usar API route local
-      console.warn('Proxy externo no disponible, usando API route local:', proxyError.message)
-      response = await fetch('/api/b2/upload', {
-        method: 'POST',
-        body: formData,
-        headers: {},
-      })
-    }
+    // Usar API route local directamente
+    const response = await fetch('/api/b2/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {},
+    })
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -130,27 +114,12 @@ export async function uploadVideo(file: File, videoId: string): Promise<string> 
     formData.append('file', file)
     formData.append('path', `videos/${videoId}/${Date.now()}-${file.name}`)
 
-    // Usar proxy externo en puerto 3001
-    const proxyUrl = 'http://localhost:3001'
-    const uploadEndpoint = `${proxyUrl}/api/b2/upload`
-    
-    // Intentar con proxy externo primero
-    let response
-    try {
-      response = await fetch(uploadEndpoint, {
-        method: 'POST',
-        body: formData,
-        headers: {},
-      })
-    } catch (proxyError: any) {
-      // Si falla el proxy externo, usar API route local
-      console.warn('Proxy externo no disponible, usando API route local:', proxyError.message)
-      response = await fetch('/api/b2/upload', {
-        method: 'POST',
-        body: formData,
-        headers: {},
-      })
-    }
+    // Usar API route local directamente
+    const response = await fetch('/api/b2/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {},
+    })
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -186,27 +155,12 @@ export async function uploadVideoThumbnail(file: File, videoId: string): Promise
     formData.append('file', file)
     formData.append('path', `videos/${videoId}/thumbnail-${Date.now()}-${file.name}`)
 
-    // Usar proxy externo en puerto 3001
-    const proxyUrl = 'http://localhost:3001'
-    const uploadEndpoint = `${proxyUrl}/api/b2/upload`
-    
-    // Intentar con proxy externo primero
-    let response
-    try {
-      response = await fetch(uploadEndpoint, {
-        method: 'POST',
-        body: formData,
-        headers: {},
-      })
-    } catch (proxyError: any) {
-      // Si falla el proxy externo, usar API route local
-      console.warn('Proxy externo no disponible, usando API route local:', proxyError.message)
-      response = await fetch('/api/b2/upload', {
-        method: 'POST',
-        body: formData,
-        headers: {},
-      })
-    }
+    // Usar API route local directamente
+    const response = await fetch('/api/b2/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {},
+    })
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -265,27 +219,12 @@ export async function uploadPDF(file: File, orderId: string): Promise<string> {
     formData.append('file', file)
     formData.append('path', `orders/${orderId}/${Date.now()}-${file.name}`)
 
-    // Usar proxy externo en puerto 3001
-    const proxyUrl = 'http://localhost:3001'
-    const uploadEndpoint = `${proxyUrl}/api/b2/upload`
-    
-    // Intentar con proxy externo primero
-    let response
-    try {
-      response = await fetch(uploadEndpoint, {
-        method: 'POST',
-        body: formData,
-        headers: {},
-      })
-    } catch (proxyError: any) {
-      // Si falla el proxy externo, usar API route local
-      console.warn('Proxy externo no disponible, usando API route local:', proxyError.message)
-      response = await fetch('/api/b2/upload', {
-        method: 'POST',
-        body: formData,
-        headers: {},
-      })
-    }
+    // Usar API route local directamente
+    const response = await fetch('/api/b2/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {},
+    })
 
     if (!response.ok) {
       const errorText = await response.text()
