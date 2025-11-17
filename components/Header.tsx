@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
+  const { language, setLanguage, t } = useLanguage()
 
   // Cerrar menú cuando cambia la ruta
   useEffect(() => {
@@ -29,7 +31,7 @@ export default function Header() {
   const menuItems = [
     {
       href: '/',
-      label: 'Inicio',
+      label: t('nav.home'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -38,7 +40,7 @@ export default function Header() {
     },
     {
       href: '/catalogo',
-      label: 'Catálogo',
+      label: t('nav.catalog'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -47,7 +49,7 @@ export default function Header() {
     },
     {
       href: '/agenda',
-      label: 'Agenda',
+      label: t('nav.agenda'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -56,7 +58,7 @@ export default function Header() {
     },
     {
       href: '/carrito',
-      label: 'Carrito',
+      label: t('nav.cart'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -65,7 +67,7 @@ export default function Header() {
     },
     {
       href: '/material-apoyo',
-      label: 'Material de Apoyo',
+      label: t('nav.material'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -74,7 +76,7 @@ export default function Header() {
     },
     {
       href: '/perfil',
-      label: 'Perfil',
+      label: t('nav.profile'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -83,7 +85,7 @@ export default function Header() {
     },
     {
       href: '/politica-privacidad',
-      label: 'Política de Privacidad',
+      label: t('nav.privacy'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -92,7 +94,7 @@ export default function Header() {
     },
     {
       href: '/terminos-condiciones',
-      label: 'Términos y Condiciones',
+      label: t('nav.terms'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -101,7 +103,7 @@ export default function Header() {
     },
     {
       href: '/informacion-envio',
-      label: 'Información de Envío',
+      label: t('nav.shipping'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -110,7 +112,7 @@ export default function Header() {
     },
     {
       href: '/poliza-devolucion',
-      label: 'Póliza de Devolución',
+      label: t('nav.returns'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -119,7 +121,7 @@ export default function Header() {
     },
     {
       href: '/nosotros',
-      label: 'Nosotros',
+      label: t('nav.about'),
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -174,8 +176,40 @@ export default function Header() {
             www.jcsellers.com
           </motion.span>
 
-          {/* Espaciador para mantener el logo centrado */}
-          <div className="w-10" />
+          {/* Switch de idioma */}
+          <motion.div
+            className="flex items-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            <motion.button
+              onClick={() => setLanguage('es')}
+              className="px-2 py-1 rounded text-xs font-medium transition-all"
+              style={{
+                backgroundColor: language === 'es' ? '#D4AF37' : 'transparent',
+                color: language === 'es' ? '#000000' : '#F8F5EF',
+                border: language === 'es' ? 'none' : '1px solid #344A3D',
+              }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              ES
+            </motion.button>
+            <motion.button
+              onClick={() => setLanguage('en')}
+              className="px-2 py-1 rounded text-xs font-medium transition-all"
+              style={{
+                backgroundColor: language === 'en' ? '#D4AF37' : 'transparent',
+                color: language === 'en' ? '#000000' : '#F8F5EF',
+                border: language === 'en' ? 'none' : '1px solid #344A3D',
+              }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              EN
+            </motion.button>
+          </motion.div>
         </div>
       </motion.header>
 
@@ -219,7 +253,7 @@ export default function Header() {
                       className="text-lg font-bold"
                       style={{ color: '#D4AF37' }}
                     >
-                      Menú
+                      {language === 'es' ? 'Menú' : 'Menu'}
                     </h2>
                     <motion.button
                       onClick={() => setIsMenuOpen(false)}

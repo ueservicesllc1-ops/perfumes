@@ -3,6 +3,8 @@ import './globals.css'
 import RegisterSW from './register-sw'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { CartProvider } from '@/contexts/CartContext'
+import { LanguageProvider } from '@/contexts/LanguageContext'
+import LanguageUpdater from '@/components/LanguageUpdater'
 
 export const metadata: Metadata = {
   title: 'Arabiyat - App Móvil',
@@ -38,10 +40,13 @@ export default function RootLayout({
       </head>
       <body style={{ backgroundColor: '#FFFFFF', margin: 0, padding: 0 }}>
         <ThemeProvider>
-          <CartProvider>
-            {children}
-            <RegisterSW />
-          </CartProvider>
+          <LanguageProvider>
+            <LanguageUpdater />
+            <CartProvider>
+              {children}
+              <RegisterSW />
+            </CartProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>
