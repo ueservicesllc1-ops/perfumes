@@ -14,178 +14,229 @@ export async function generateOrderPDF(orderData: {
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
-  let yPos = 20
+  
+  // Colores de la marca
+  const goldColor = [212, 175, 55] // #D4AF37
+  const darkGreenColor = [24, 43, 33] // #182B21
+  const cardColor = [52, 74, 61] // #344A3D
+  const lightTextColor = [248, 245, 239] // #F8F5EF
+  const grayColor = [107, 93, 79] // #6B5D4F
+  
+  let yPos = 0
 
-  // Título
-  doc.setFontSize(22)
+  // ========== ENCABEZADO CON FONDO DORADO ==========
+  doc.setFillColor(...goldColor)
+  doc.rect(0, 0, pageWidth, 50, 'F')
+  
+  // Logo/Título principal
   doc.setTextColor(0, 0, 0)
+  doc.setFontSize(28)
   doc.setFont('helvetica', 'bold')
-  doc.text('ORDEN DE COMPRA', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 10
-  doc.setFontSize(14)
+  doc.text('ARABIYAT', pageWidth / 2, 20, { align: 'center' })
+  
+  doc.setFontSize(16)
   doc.setFont('helvetica', 'normal')
-  doc.text('ARABIYAT PRESTIGE', pageWidth / 2, yPos, { align: 'center' })
-  yPos += 15
-
-  // Línea separadora
-  doc.setDrawColor(0, 0, 0)
-  doc.setLineWidth(0.5)
-  doc.line(20, yPos, pageWidth - 20, yPos)
-  yPos += 10
-
-  // Número de orden y fecha
+  doc.text('PRESTIGE', pageWidth / 2, 30, { align: 'center' })
+  
   doc.setFontSize(12)
+  doc.setTextColor(60, 60, 60)
+  doc.text('ORDEN DE COMPRA', pageWidth / 2, 42, { align: 'center' })
+  
+  yPos = 60
+
+  // ========== INFORMACIÓN DE ORDEN ==========
+  doc.setFillColor(...cardColor)
+  doc.roundedRect(15, yPos, pageWidth - 30, 35, 3, 3, 'F')
+  
+  doc.setTextColor(...lightTextColor)
+  doc.setFontSize(11)
   doc.setFont('helvetica', 'bold')
-  doc.text(`Número de Orden: ${orderData.orderId}`, 20, yPos)
-  yPos += 8
+  doc.text('NÚMERO DE ORDEN', 20, yPos + 10)
   doc.setFont('helvetica', 'normal')
+  doc.setTextColor(...goldColor)
+  doc.setFontSize(14)
+  doc.text(orderData.orderId, 20, yPos + 20)
+  
   const now = new Date()
-  doc.text(`Fecha: ${now.toLocaleDateString('es-ES', { 
+  const dateStr = now.toLocaleDateString('es-ES', { 
     year: 'numeric', 
     month: 'long', 
-    day: 'numeric',
+    day: 'numeric'
+  })
+  const timeStr = now.toLocaleTimeString('es-ES', {
     hour: '2-digit',
     minute: '2-digit'
-  })}`, 20, yPos)
-  yPos += 15
-
-  // Información de envío
-  doc.setFontSize(14)
-  doc.setFont('helvetica', 'bold')
-  doc.text('INFORMACIÓN DE ENVÍO Y CONTACTO', 20, yPos)
-  yPos += 10
-  doc.setFontSize(11)
-  doc.setFont('helvetica', 'normal')
+  })
   
-  // Nombre completo
+  doc.setFontSize(9)
+  doc.setTextColor(...lightTextColor)
+  doc.text(`Fecha: ${dateStr}`, pageWidth - 20, yPos + 10, { align: 'right' })
+  doc.text(`Hora: ${timeStr}`, pageWidth - 20, yPos + 18, { align: 'right' })
+  
+  yPos += 45
+
+  // ========== INFORMACIÓN DE ENVÍO ==========
+  doc.setFillColor(...darkGreenColor)
+  doc.roundedRect(15, yPos, pageWidth - 30, 5, 3, 3, 'F')
+  doc.setTextColor(...goldColor)
+  doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
-  doc.text('Nombre Completo:', 20, yPos)
+  doc.text('📦 INFORMACIÓN DE ENVÍO', 20, yPos + 3.5)
+  yPos += 10
+
+  doc.setFillColor(245, 245, 245)
+  doc.roundedRect(15, yPos, pageWidth - 30, 75, 3, 3, 'F')
+  
+  doc.setTextColor(40, 40, 40)
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'bold')
+  
+  let infoY = yPos + 8
+  
+  // Nombre
+  doc.text('Nombre:', 20, infoY)
   doc.setFont('helvetica', 'normal')
-  doc.text(orderData.shippingInfo.fullName, 70, yPos)
-  yPos += 8
+  doc.text(orderData.shippingInfo.fullName, 60, infoY)
+  infoY += 8
   
   // Email
   doc.setFont('helvetica', 'bold')
-  doc.text('Email:', 20, yPos)
+  doc.text('Email:', 20, infoY)
   doc.setFont('helvetica', 'normal')
-  doc.text(orderData.shippingInfo.email, 70, yPos)
-  yPos += 8
+  doc.text(orderData.shippingInfo.email, 60, infoY)
+  infoY += 8
   
   // Teléfono
   doc.setFont('helvetica', 'bold')
-  doc.text('Teléfono:', 20, yPos)
+  doc.text('Teléfono:', 20, infoY)
   doc.setFont('helvetica', 'normal')
-  doc.text(orderData.shippingInfo.phone, 70, yPos)
-  yPos += 8
+  doc.text(orderData.shippingInfo.phone, 60, infoY)
+  infoY += 8
   
   // Dirección
   doc.setFont('helvetica', 'bold')
-  doc.text('Dirección:', 20, yPos)
+  doc.text('Dirección:', 20, infoY)
   doc.setFont('helvetica', 'normal')
   const addressLines = doc.splitTextToSize(orderData.shippingInfo.address, pageWidth - 80)
-  doc.text(addressLines, 70, yPos)
-  yPos += addressLines.length * 7
+  doc.text(addressLines, 60, infoY)
+  infoY += addressLines.length * 6
   
   // Ciudad, Estado, Código Postal
   doc.setFont('helvetica', 'bold')
-  doc.text('Ciudad:', 20, yPos)
+  doc.text('Ciudad:', 20, infoY)
   doc.setFont('helvetica', 'normal')
-  doc.text(orderData.shippingInfo.city, 70, yPos)
-  yPos += 8
+  doc.text(orderData.shippingInfo.city, 60, infoY)
+  infoY += 7
   
   doc.setFont('helvetica', 'bold')
-  doc.text('Estado:', 20, yPos)
+  doc.text('Estado:', 20, infoY)
   doc.setFont('helvetica', 'normal')
-  doc.text(orderData.shippingInfo.state, 70, yPos)
-  yPos += 8
+  doc.text(orderData.shippingInfo.state, 60, infoY)
+  infoY += 7
   
   doc.setFont('helvetica', 'bold')
-  doc.text('Código Postal:', 20, yPos)
+  doc.text('Código Postal:', 20, infoY)
   doc.setFont('helvetica', 'normal')
-  doc.text(orderData.shippingInfo.zipCode, 70, yPos)
-  yPos += 8
+  doc.text(orderData.shippingInfo.zipCode, 60, infoY)
+  infoY += 7
   
-  // País
   doc.setFont('helvetica', 'bold')
-  doc.text('País:', 20, yPos)
+  doc.text('País:', 20, infoY)
   doc.setFont('helvetica', 'normal')
-  doc.text(orderData.shippingInfo.country, 70, yPos)
-  yPos += 15
+  doc.text(orderData.shippingInfo.country, 60, infoY)
+  
+  yPos += 85
 
-  // Línea separadora
-  doc.setDrawColor(0, 0, 0)
-  doc.setLineWidth(0.5)
-  doc.line(20, yPos, pageWidth - 20, yPos)
-  yPos += 10
-
-  // Productos
-  doc.setFontSize(14)
+  // ========== PRODUCTOS ==========
+  doc.setFillColor(...darkGreenColor)
+  doc.roundedRect(15, yPos, pageWidth - 30, 5, 3, 3, 'F')
+  doc.setTextColor(...goldColor)
+  doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
-  doc.text('DETALLES DE PRODUCTOS', 20, yPos)
+  doc.text('🛍️ PRODUCTOS', 20, yPos + 3.5)
   yPos += 10
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'normal')
 
   orderData.items.forEach((item, index) => {
-    if (yPos > pageHeight - 40) {
+    if (yPos > pageHeight - 60) {
       doc.addPage()
       yPos = 20
     }
 
+    // Caja para cada producto
+    doc.setFillColor(250, 250, 250)
+    doc.roundedRect(15, yPos, pageWidth - 30, 35, 3, 3, 'F')
+    
+    // Borde dorado
+    doc.setDrawColor(...goldColor)
+    doc.setLineWidth(0.5)
+    doc.roundedRect(15, yPos, pageWidth - 30, 35, 3, 3, 'D')
+    
     // Número y nombre del producto
+    doc.setTextColor(...darkGreenColor)
+    doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
-    doc.text(`${index + 1}. ${item.name}`, 20, yPos)
-    yPos += 7
+    doc.text(`${index + 1}. ${item.name}`, 20, yPos + 8)
     
-    // Tamaño si existe
+    // Detalles del producto
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(80, 80, 80)
+    
+    let detailY = yPos + 16
+    
     if (item.size) {
-      doc.setFont('helvetica', 'normal')
-      doc.text(`   Tamaño: ${item.size}`, 20, yPos)
-      yPos += 6
+      doc.text(`Tamaño: ${item.size}`, 20, detailY)
+      detailY += 6
     }
     
-    // Precio unitario y cantidad
-    doc.text(`   Precio Unitario: $${item.price.toFixed(2)}`, 20, yPos)
-    yPos += 6
-    doc.text(`   Cantidad: ${item.quantity}`, 20, yPos)
-    yPos += 6
+    doc.text(`Precio Unitario: $${item.price.toFixed(2)}`, 20, detailY)
+    detailY += 6
+    doc.text(`Cantidad: ${item.quantity}`, 20, detailY)
     
-    // Subtotal
-    doc.setFont('helvetica', 'bold')
+    // Subtotal a la derecha
     const subtotal = item.price * item.quantity
-    doc.text(`   Subtotal: $${subtotal.toFixed(2)}`, 20, yPos)
-    yPos += 10
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...goldColor)
+    doc.setFontSize(11)
+    doc.text(`$${subtotal.toFixed(2)}`, pageWidth - 20, yPos + 20, { align: 'right' })
     
-    // Línea separadora entre productos
-    if (index < orderData.items.length - 1) {
-      doc.setDrawColor(200, 200, 200)
-      doc.setLineWidth(0.3)
-      doc.line(20, yPos, pageWidth - 20, yPos)
-      yPos += 8
-    }
+    yPos += 40
   })
 
-  // Línea separadora antes del total
+  // ========== TOTAL ==========
   yPos += 5
-  doc.setDrawColor(0, 0, 0)
-  doc.setLineWidth(0.5)
-  doc.line(20, yPos, pageWidth - 20, yPos)
-  yPos += 10
-
-  // Total
-  doc.setFontSize(14)
+  
+  // Fondo dorado para el total
+  doc.setFillColor(...goldColor)
+  doc.roundedRect(15, yPos, pageWidth - 30, 20, 3, 3, 'F')
+  
+  doc.setTextColor(0, 0, 0)
+  doc.setFontSize(16)
   doc.setFont('helvetica', 'bold')
-  doc.text(`TOTAL A PAGAR: $${orderData.total.toFixed(2)}`, pageWidth - 20, yPos, { align: 'right' })
-  yPos += 15
+  doc.text('TOTAL A PAGAR', 20, yPos + 12)
+  doc.setFontSize(18)
+  doc.text(`$${orderData.total.toFixed(2)}`, pageWidth - 20, yPos + 12, { align: 'right' })
+  
+  yPos += 30
 
-  // Nota final
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'italic')
-  doc.setTextColor(100, 100, 100)
-  doc.text('Gracias por su compra. Esta orden será procesada y enviada a la dirección indicada.', 20, yPos, {
-    maxWidth: pageWidth - 40,
-    align: 'left'
-  })
+  // ========== NOTA FINAL ==========
+  if (yPos < pageHeight - 30) {
+    doc.setFillColor(250, 250, 250)
+    doc.roundedRect(15, yPos, pageWidth - 30, 20, 3, 3, 'F')
+    
+    doc.setTextColor(100, 100, 100)
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'italic')
+    doc.text('Gracias por su compra. Esta orden será procesada y enviada a la dirección indicada.', 20, yPos + 10, {
+      maxWidth: pageWidth - 40,
+      align: 'left'
+    })
+    
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(120, 120, 120)
+    doc.setFontSize(8)
+    doc.text('www.jcsellers.com', pageWidth / 2, yPos + 18, { align: 'center' })
+  }
 
   // Generar blob
   const pdfBlob = doc.output('blob')
