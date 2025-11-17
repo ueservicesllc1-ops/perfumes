@@ -200,6 +200,22 @@ export default function AdminVideoForm({ video, onClose, onSuccess }: AdminVideo
         <div className="p-4 rounded-lg" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
           <h3 className="text-sm font-semibold mb-3" style={{ color: '#D4AF37' }}>Video</h3>
           
+          {/* Advertencia importante sobre formato */}
+          <div className="mb-3 p-3 rounded" style={{ backgroundColor: '#1a1a1a', border: '1px solid #D4AF37' }}>
+            <p className="text-xs font-semibold mb-1" style={{ color: '#D4AF37' }}>
+              ⚠️ IMPORTANTE: Formato de Video
+            </p>
+            <p className="text-xs mb-1" style={{ color: '#FFFFFF' }}>
+              Los videos <strong>DEBEN estar en formato H.264 (MP4)</strong> para funcionar en móviles.
+            </p>
+            <p className="text-xs" style={{ color: '#999' }}>
+              Si tu video está en H.265/HEVC, conviértelo primero con:
+            </p>
+            <code className="text-xs block mt-1 p-2 rounded" style={{ backgroundColor: '#000000', color: '#D4AF37' }}>
+              ffmpeg -i video.mp4 -vcodec libx264 -acodec aac -strict -2 video_h264.mp4
+            </code>
+          </div>
+          
           {formData.videoUrl && (
             <div className="mb-3 p-2 rounded" style={{ backgroundColor: '#1a1a1a' }}>
               <p className="text-xs mb-1" style={{ color: '#999' }}>Video actual:</p>
@@ -210,11 +226,11 @@ export default function AdminVideoForm({ video, onClose, onSuccess }: AdminVideo
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: '#D4AF37' }}>
-                Seleccionar Video
+                Seleccionar Video (MP4 H.264)
               </label>
               <input
                 type="file"
-                accept="video/*"
+                accept="video/mp4,video/*"
                 onChange={handleVideoChange}
                 className="w-full px-3 py-2 rounded-lg text-sm"
                 style={{ backgroundColor: '#1a1a1a', color: '#FFFFFF', border: '1px solid #444' }}

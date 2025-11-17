@@ -12,6 +12,7 @@ interface VideoModalProps {
 export default function VideoModal({ video, onClose }: VideoModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     // Prevenir scroll del body cuando el modal está abierto
@@ -29,6 +30,30 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
       }
     }
   }, [])
+
+  function handleError(e: React.SyntheticEvent<HTMLVideoElement, Event>) {
+    const videoElement = e.currentTarget
+    const error = videoElement.error
+    if (error) {
+      let errorMessage = 'Error al reproducir el video'
+      switch (error.code) {
+        case error.MEDIA_ERR_ABORTED:
+          errorMessage = 'La reproducción fue abortada'
+          break
+        case error.MEDIA_ERR_NETWORK:
+          errorMessage = 'Error de red al cargar el video'
+          break
+        case error.MEDIA_ERR_DECODE:
+          errorMessage = 'Error al decodificar el video. El formato puede no ser compatible (debe ser H.264/MP4)'
+          break
+        case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+          errorMessage = 'El formato del video no es compatible. Debe ser MP4 H.264'
+          break
+      }
+      console.error('Error de video:', error, errorMessage)
+      setError(errorMessage)
+    }
+  }
 
   function handlePlay() {
     if (videoRef.current) {
@@ -93,6 +118,21 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
 
         {/* Video */}
         <div className="relative w-full h-full rounded-lg overflow-hidden" style={{ backgroundColor: '#000000' }}>
+          {error && (
+            <div className="absolute inset-0 flex items-center justify-center p-4 z-20" style={{ backgroundColor: 'rgba(0, 0, 0, 0.9)' }}>
+              <div className="text-center">
+                <p className="text-sm font-semibold mb-2" style={{ color: '#D4AF37' }}>
+                  ⚠️ Error de Reproducción
+                </p>
+                <p className="text-xs mb-3" style={{ color: '#FFFFFF' }}>
+                  {error}
+                </p>
+                <p className="text-xs" style={{ color: '#999' }}>
+                  Asegúrate de que el video esté en formato MP4 H.264
+                </p>
+              </div>
+            </div>
+          )}
           <video
             ref={videoRef}
             src={videoUrl}
@@ -100,8 +140,12 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
             playsInline
             preload="metadata"
             className="w-full h-full"
-            onPlay={() => setIsPlaying(true)}
+            onPlay={() => {
+              setIsPlaying(true)
+              setError(null)
+            }}
             onPause={() => setIsPlaying(false)}
+            onError={handleError}
             onClick={(e) => e.stopPropagation()}
             {...{ 'webkit-playsinline': 'true' } as any}
           >
