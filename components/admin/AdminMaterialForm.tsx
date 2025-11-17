@@ -14,7 +14,6 @@ interface AdminMaterialFormProps {
 export default function AdminMaterialForm({ material, onClose, onSuccess }: AdminMaterialFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploadingFile, setUploadingFile] = useState(false)
-  const [uploadingThumbnail, setUploadingThumbnail] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -26,7 +25,6 @@ export default function AdminMaterialForm({ material, onClose, onSuccess }: Admi
     order: '0',
   })
   const [file, setFile] = useState<File | null>(null)
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [thumbnailPreview, setThumbnailPreview] = useState<string>('')
 
   useEffect(() => {
@@ -53,7 +51,45 @@ export default function AdminMaterialForm({ material, onClose, onSuccess }: Admi
     }))
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function generateVideoThumbnail(videoFile: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      
+      video.preload = 'metadata'
+      video.onloadedmetadata = () => {
+        video.currentTime = 1 // Obtener frame a 1 segundo
+      }
+      
+      video.onseeked = () => {
+        if (ctx) {
+          canvas.width = video.videoWidth
+          canvas.height = video.videoHeight
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const reader = new FileReader()
+              reader.onloadend = () => {
+                resolve(reader.result as string)
+              }
+              reader.onerror = reject
+              reader.readAsDataURL(blob)
+            } else {
+              reject(new Error('No se pudo generar la miniatura'))
+            }
+          }, 'image/jpeg', 0.8)
+        } else {
+          reject(new Error('No se pudo obtener el contexto del canvas'))
+        }
+      }
+      
+      video.onerror = reject
+      video.src = URL.createObjectURL(videoFile)
+    })
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)
@@ -66,25 +102,29 @@ export default function AdminMaterialForm({ material, onClose, onSuccess }: Admi
       // Detectar tipo de archivo
       if (selectedFile.type.startsWith('image/')) {
         setFormData(prev => ({ ...prev, fileType: 'image' }))
+        // Para imágenes, usar la misma imagen como miniatura
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setThumbnailPreview(reader.result as string)
+        }
+        reader.readAsDataURL(selectedFile)
       } else if (selectedFile.type.startsWith('video/')) {
         setFormData(prev => ({ ...prev, fileType: 'video' }))
+        // Para videos, generar miniatura automáticamente
+        try {
+          const thumbnailDataUrl = await generateVideoThumbnail(selectedFile)
+          setThumbnailPreview(thumbnailDataUrl)
+        } catch (error) {
+          console.error('Error generando miniatura de video:', error)
+        }
       } else if (selectedFile.type === 'application/pdf') {
         setFormData(prev => ({ ...prev, fileType: 'pdf' }))
+        // Para PDFs, no generar miniatura (se mostrará el icono)
+        setThumbnailPreview('')
       } else {
         setFormData(prev => ({ ...prev, fileType: 'other' }))
+        setThumbnailPreview('')
       }
-    }
-  }
-
-  function handleThumbnailChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selectedFile = e.target.files?.[0]
-    if (selectedFile) {
-      setThumbnailFile(selectedFile)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setThumbnailPreview(reader.result as string)
-      }
-      reader.readAsDataURL(selectedFile)
     }
   }
 
@@ -99,17 +139,33 @@ export default function AdminMaterialForm({ material, onClose, onSuccess }: Admi
     setUploadingFile(true)
     try {
       let fileUrl: string
+      let thumbnailUrl: string = ''
       
       if (formData.fileType === 'image') {
         fileUrl = await uploadPerfumeImage(file, tempId)
+        // Para imágenes, usar la misma imagen como miniatura
+        thumbnailUrl = fileUrl
       } else if (formData.fileType === 'video') {
         fileUrl = await uploadVideo(file, tempId)
+        // Para videos, generar y subir miniatura automáticamente
+        if (thumbnailPreview && thumbnailPreview.startsWith('data:')) {
+          try {
+            const response = await fetch(thumbnailPreview)
+            const blob = await response.blob()
+            const thumbnailFile = new File([blob], `thumbnail-${Date.now()}.jpg`, { type: 'image/jpeg' })
+            thumbnailUrl = await uploadVideoThumbnail(thumbnailFile, tempId)
+          } catch (error) {
+            console.error('Error subiendo miniatura de video:', error)
+          }
+        }
       } else {
         // Para PDFs y otros archivos, usar uploadPerfumeImage como genérico
         fileUrl = await uploadPerfumeImage(file, tempId)
+        // No generar miniatura para PDFs y otros
+        thumbnailUrl = ''
       }
       
-      setFormData(prev => ({ ...prev, fileUrl }))
+      setFormData(prev => ({ ...prev, fileUrl, thumbnailUrl }))
       setFile(null)
       alert('Archivo subido exitosamente a B2')
     } catch (error) {
@@ -117,29 +173,6 @@ export default function AdminMaterialForm({ material, onClose, onSuccess }: Admi
       alert('Error al subir el archivo: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     } finally {
       setUploadingFile(false)
-    }
-  }
-
-  async function handleThumbnailUpload() {
-    if (!thumbnailFile) {
-      alert('Por favor selecciona una miniatura')
-      return
-    }
-
-    const tempId = material?.id || `temp-${Date.now()}`
-
-    setUploadingThumbnail(true)
-    try {
-      const thumbnailUrl = await uploadVideoThumbnail(thumbnailFile, tempId)
-      setFormData(prev => ({ ...prev, thumbnailUrl }))
-      setThumbnailFile(null)
-      setThumbnailPreview('')
-      alert('Miniatura subida exitosamente a B2')
-    } catch (error) {
-      console.error('Error subiendo miniatura:', error)
-      alert('Error al subir la miniatura: ' + (error instanceof Error ? error.message : 'Error desconocido'))
-    } finally {
-      setUploadingThumbnail(false)
     }
   }
 
@@ -158,33 +191,29 @@ export default function AdminMaterialForm({ material, onClose, onSuccess }: Admi
           
           if (formData.fileType === 'image') {
             finalFileUrl = await uploadPerfumeImage(file, tempId)
+            // Para imágenes, usar la misma imagen como miniatura
+            finalThumbnailUrl = finalFileUrl
           } else if (formData.fileType === 'video') {
             finalFileUrl = await uploadVideo(file, tempId)
+            // Para videos, generar y subir miniatura automáticamente
+            if (thumbnailPreview && thumbnailPreview.startsWith('data:')) {
+              // Convertir data URL a File
+              const response = await fetch(thumbnailPreview)
+              const blob = await response.blob()
+              const thumbnailFile = new File([blob], `thumbnail-${Date.now()}.jpg`, { type: 'image/jpeg' })
+              finalThumbnailUrl = await uploadVideoThumbnail(thumbnailFile, tempId)
+            }
           } else {
             finalFileUrl = await uploadPerfumeImage(file, tempId)
+            // Para PDFs y otros, no usar miniatura
+            finalThumbnailUrl = ''
           }
           
-          setFormData(prev => ({ ...prev, fileUrl: finalFileUrl }))
+          setFormData(prev => ({ ...prev, fileUrl: finalFileUrl, thumbnailUrl: finalThumbnailUrl }))
           setFile(null)
         } catch (error) {
           console.error('Error subiendo archivo:', error)
           alert('Error al subir el archivo. Por favor intenta de nuevo.')
-          setLoading(false)
-          return
-        }
-      }
-
-      // Si hay una miniatura nueva, subirla primero
-      if (thumbnailFile) {
-        try {
-          const tempId = material?.id || `temp-${Date.now()}`
-          finalThumbnailUrl = await uploadVideoThumbnail(thumbnailFile, tempId)
-          setFormData(prev => ({ ...prev, thumbnailUrl: finalThumbnailUrl }))
-          setThumbnailFile(null)
-          setThumbnailPreview('')
-        } catch (error) {
-          console.error('Error subiendo miniatura:', error)
-          alert('Error al subir la miniatura. Por favor intenta de nuevo.')
           setLoading(false)
           return
         }
@@ -284,59 +313,39 @@ export default function AdminMaterialForm({ material, onClose, onSuccess }: Admi
           </div>
         </div>
 
-        {/* Thumbnail Section */}
-        <div className="p-4 rounded-lg" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
-          <h3 className="text-sm font-semibold mb-3" style={{ color: '#D4AF37' }}>Miniatura (Opcional)</h3>
-          
-          {thumbnailDisplayUrl && (
-            <div className="mb-3 w-20 h-32 mx-auto rounded overflow-hidden" style={{ backgroundColor: '#1a1a1a' }}>
-              {thumbnailDisplayUrl.startsWith('data:') ? (
+        {/* Thumbnail Preview (solo mostrar, no editar) */}
+        {(formData.fileType === 'video' || formData.fileType === 'image') && (
+          <div className="p-4 rounded-lg" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: '#D4AF37' }}>
+              Vista Previa de Miniatura
+              <span className="text-xs ml-2" style={{ color: '#999' }}>
+                (Se genera automáticamente)
+              </span>
+            </h3>
+            
+            {thumbnailPreview && (
+              <div className="mb-3 w-32 h-48 mx-auto rounded overflow-hidden" style={{ backgroundColor: '#1a1a1a' }}>
                 <img
-                  src={thumbnailDisplayUrl}
+                  src={thumbnailPreview}
                   alt="Preview"
                   className="w-full h-full object-cover"
                 />
-              ) : (
-                <img
-                  src={thumbnailDisplayUrl}
-                  alt="Thumbnail"
-                  className="w-full h-full object-cover"
-                />
-              )}
-            </div>
-          )}
-
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: '#D4AF37' }}>
-                Seleccionar Miniatura
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleThumbnailChange}
-                className="w-full px-3 py-2 rounded-lg text-sm"
-                style={{ backgroundColor: '#1a1a1a', color: '#FFFFFF', border: '1px solid #444' }}
-              />
-            </div>
-
-            {thumbnailFile && (
-              <button
-                type="button"
-                onClick={handleThumbnailUpload}
-                disabled={uploadingThumbnail}
-                className="w-full px-3 py-2 rounded-lg text-xs font-medium transition-all active:scale-95"
-                style={{
-                  backgroundColor: '#D4AF37',
-                  color: '#000000',
-                  opacity: uploadingThumbnail ? 0.6 : 1
-                }}
-              >
-                {uploadingThumbnail ? 'Subiendo a B2...' : 'Subir Miniatura a B2'}
-              </button>
+              </div>
+            )}
+            
+            {formData.fileType === 'video' && !thumbnailPreview && file && (
+              <p className="text-xs text-center" style={{ color: '#999' }}>
+                La miniatura se generará automáticamente al subir el video
+              </p>
+            )}
+            
+            {formData.fileType === 'image' && !thumbnailPreview && file && (
+              <p className="text-xs text-center" style={{ color: '#999' }}>
+                La imagen se usará como miniatura automáticamente
+              </p>
             )}
           </div>
-        </div>
+        )}
 
         {/* Basic Info */}
         <div className="p-4 rounded-lg space-y-3" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
