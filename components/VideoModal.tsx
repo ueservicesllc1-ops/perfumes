@@ -56,9 +56,8 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
     }
   }
 
-  const videoUrl = video.videoUrl.startsWith('/api/b2')
-    ? video.videoUrl
-    : getVideoUrl(video.videoUrl)
+  // Usar URL directa de B2 para mejor compatibilidad con iOS/Safari
+  const videoUrl = getVideoUrl(video.videoUrl)
 
   return (
     <div
