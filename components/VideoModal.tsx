@@ -23,13 +23,40 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
   }, [])
 
   useEffect(() => {
-    // Pausar video cuando se cierra el modal
-    return () => {
+    // Reproducir automáticamente cuando el modal se abre
+    const playVideo = async () => {
       if (videoRef.current) {
-        videoRef.current.pause()
+        try {
+          await videoRef.current.play()
+          setIsPlaying(true)
+        } catch (error) {
+          console.warn('No se pudo reproducir automáticamente:', error)
+          // Si falla la reproducción automática (por políticas del navegador),
+          // el usuario tendrá que hacer clic manualmente
+        }
       }
     }
-  }, [])
+
+    // Intentar reproducir cuando el video esté listo
+    const video = videoRef.current
+    if (video) {
+      const handleCanPlay = () => {
+        playVideo()
+      }
+      
+      video.addEventListener('canplay', handleCanPlay)
+      
+      // También intentar inmediatamente si el video ya está listo
+      if (video.readyState >= 3) {
+        playVideo()
+      }
+
+      return () => {
+        video.removeEventListener('canplay', handleCanPlay)
+        video.pause()
+      }
+    }
+  }, [videoUrl])
 
   function handleError(e: React.SyntheticEvent<HTMLVideoElement, Event>) {
     const videoElement = e.currentTarget
@@ -52,32 +79,6 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
       }
       console.error('Error de video:', error, errorMessage)
       setError(errorMessage)
-    }
-  }
-
-  function handlePlay() {
-    if (videoRef.current) {
-      videoRef.current.play()
-      setIsPlaying(true)
-    }
-  }
-
-  function handlePause() {
-    if (videoRef.current) {
-      videoRef.current.pause()
-      setIsPlaying(false)
-    }
-  }
-
-  function handlePlayPause() {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play()
-        setIsPlaying(true)
-      } else {
-        videoRef.current.pause()
-        setIsPlaying(false)
-      }
     }
   }
 
@@ -138,7 +139,8 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
             src={videoUrl}
             controls
             playsInline
-            preload="metadata"
+            autoPlay
+            preload="auto"
             className="w-full h-full"
             onPlay={() => {
               setIsPlaying(true)
@@ -151,34 +153,6 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
           >
             Tu navegador no soporta la reproducción de videos.
           </video>
-          
-          {/* Botón de reproducir centrado */}
-          {!isPlaying && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handlePlay()
-              }}
-              className="absolute inset-0 flex items-center justify-center z-10"
-              style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-            >
-              <div
-                className="w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-95"
-                style={{
-                  backgroundColor: 'rgba(212, 175, 55, 0.9)',
-                  color: '#000000',
-                }}
-              >
-                <svg
-                  className="w-12 h-12 ml-1"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </button>
-          )}
         </div>
 
         {/* Información del video */}
