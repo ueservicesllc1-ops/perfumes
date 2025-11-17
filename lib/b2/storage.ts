@@ -233,24 +233,24 @@ export async function uploadVideoThumbnail(file: File, videoId: string): Promise
 /**
  * Obtener URL de video
  * @param videoPath - Ruta del video en B2
- * @returns URL completa del video (URL pública directa de B2 para mejor compatibilidad con iOS/Safari)
+ * @returns URL completa del video
+ * Para iOS/Safari, usa el proxy que maneja mejor CORS y Range requests
+ * Para otros navegadores, puede usar URL directa de B2
  */
 export function getVideoUrl(videoPath: string): string {
-  // Si ya es una URL completa de B2, retornarla
-  if (videoPath.startsWith('https://') && videoPath.includes('backblazeb2.com')) {
+  // Si ya es una URL completa, retornarla
+  if (videoPath.startsWith('https://') || videoPath.startsWith('http://')) {
     return videoPath
   }
   
-  // Si es una URL del proxy, convertirla a URL directa de B2
-  if (videoPath.startsWith('/api/b2/video?path=')) {
-    const actualPath = decodeURIComponent(videoPath.split('?path=')[1])
-    const { getB2PublicUrl } = require('@/lib/b2/config')
-    return getB2PublicUrl(actualPath)
+  // Si ya es una URL del proxy, retornarla
+  if (videoPath.startsWith('/api/b2')) {
+    return videoPath
   }
   
-  // Si es una ruta relativa, usar URL pública directa de B2 (mejor para streaming en iOS/Safari)
-  const { getB2PublicUrl } = require('@/lib/b2/config')
-  return getB2PublicUrl(videoPath)
+  // Para iOS/Safari, usar el proxy que maneja mejor CORS y Range requests
+  // El proxy está optimizado para streaming con soporte de Range requests
+  return `/api/b2/video?path=${encodeURIComponent(videoPath)}`
 }
 
 /**

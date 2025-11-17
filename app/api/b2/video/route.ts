@@ -35,51 +35,59 @@ export async function GET(request: NextRequest) {
     // Obtener Range header para soporte de streaming (necesario para iOS/Safari)
     const rangeHeader = request.headers.get('range')
     
-    // Obtener objeto de B2
-    const command = new GetObjectCommand({
-      Bucket: b2Config.bucketName,
-      Key: path,
-      ...(rangeHeader && { Range: rangeHeader }),
+    // Construir URL directa de B2 para mejor soporte de Range requests
+    const b2PublicUrl = `https://${b2Config.bucketName}.s3.${b2Config.region}.backblazeb2.com/${path}`
+    
+    // Hacer fetch directo a B2 con Range header si existe
+    const fetchHeaders: HeadersInit = {}
+    if (rangeHeader) {
+      fetchHeaders['Range'] = rangeHeader
+    }
+    
+    const b2Response = await fetch(b2PublicUrl, {
+      headers: fetchHeaders,
     })
 
-    const response = await s3Client.send(command)
-
-    if (!response.Body) {
+    if (!b2Response.ok) {
+      if (b2Response.status === 404) {
+        return NextResponse.json(
+          { error: 'File not found' },
+          { status: 404 }
+        )
+      }
       return NextResponse.json(
-        { error: 'File not found' },
-        { status: 404 }
+        { error: `Error fetching video: ${b2Response.statusText}` },
+        { status: b2Response.status }
       )
     }
 
-    // Si hay Range header, retornar 206 Partial Content (necesario para iOS/Safari)
-    if (rangeHeader && response.ContentRange) {
-      const stream = response.Body as any
-      
-      return new NextResponse(stream, {
-        status: 206,
-        headers: {
-          'Content-Type': response.ContentType || 'video/mp4',
-          'Content-Length': response.ContentLength?.toString() || '0',
-          'Content-Range': response.ContentRange,
-          'Accept-Ranges': 'bytes',
-          'Cache-Control': 'public, max-age=31536000, immutable',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS, HEAD',
-          'Access-Control-Allow-Headers': 'Content-Type, Range',
-          'Access-Control-Expose-Headers': 'Content-Length, Content-Range, Accept-Ranges',
-        },
-      })
+    // Obtener headers de la respuesta de B2
+    const contentType = b2Response.headers.get('content-type') || 'video/mp4'
+    const contentLength = b2Response.headers.get('content-length') || '0'
+    const contentRange = b2Response.headers.get('content-range')
+    const acceptRanges = b2Response.headers.get('accept-ranges') || 'bytes'
+
+    // Si hay Range y Content-Range, es una respuesta 206 Partial Content
+    const isPartialContent = rangeHeader && contentRange && b2Response.status === 206
+
+    // Obtener el stream del body
+    const stream = b2Response.body
+
+    if (!stream) {
+      return NextResponse.json(
+        { error: 'No video content' },
+        { status: 500 }
+      )
     }
 
-    // Si no hay Range, retornar todo el video (pero mejor usar streaming)
-    const stream = response.Body as any
-
+    // Retornar respuesta con headers apropiados
     return new NextResponse(stream, {
-      status: 200,
+      status: isPartialContent ? 206 : 200,
       headers: {
-        'Content-Type': response.ContentType || 'video/mp4',
-        'Content-Length': response.ContentLength?.toString() || '0',
-        'Accept-Ranges': 'bytes',
+        'Content-Type': contentType,
+        'Content-Length': contentLength,
+        ...(contentRange && { 'Content-Range': contentRange }),
+        'Accept-Ranges': acceptRanges,
         'Cache-Control': 'public, max-age=31536000, immutable',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, OPTIONS, HEAD',
