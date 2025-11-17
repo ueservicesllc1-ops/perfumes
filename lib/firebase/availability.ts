@@ -12,12 +12,30 @@ export interface AvailableSlot {
 
 export async function getAvailableSlots(): Promise<AvailableSlot[]> {
   try {
-    const q = query(collection(db, 'availability'), orderBy('date'), orderBy('time'))
-    const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map(doc => ({
+    const availabilityRef = collection(db, 'availability')
+    // Intentar ordenar por date y time, pero si falla (por ejemplo, si no hay índice), obtener todos sin ordenar
+    let querySnapshot
+    try {
+      const q = query(availabilityRef, orderBy('date'), orderBy('time'))
+      querySnapshot = await getDocs(q)
+    } catch (orderError) {
+      // Si falla el ordenamiento (por ejemplo, si no hay índice), obtener todos sin ordenar
+      console.warn('Error al ordenar slots por date y time (posiblemente falta índice). Obteniendo sin ordenar.')
+      querySnapshot = await getDocs(availabilityRef)
+    }
+    
+    const slots = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as AvailableSlot[]
+    
+    // Ordenar en el cliente si es necesario
+    return slots.sort((a, b) => {
+      if (a.date !== b.date) {
+        return a.date.localeCompare(b.date)
+      }
+      return a.time.localeCompare(b.time)
+    })
   } catch (error) {
     console.error('Error getting available slots:', error)
     throw error
@@ -64,17 +82,26 @@ export async function deleteAvailableSlot(id: string): Promise<void> {
 
 export async function getAvailableSlotsByDate(date: string): Promise<AvailableSlot[]> {
   try {
-    const q = query(
-      collection(db, 'availability'),
-      orderBy('date'),
-      orderBy('time')
-    )
-    const querySnapshot = await getDocs(q)
+    const availabilityRef = collection(db, 'availability')
+    // Intentar ordenar por date y time, pero si falla (por ejemplo, si no hay índice), obtener todos sin ordenar
+    let querySnapshot
+    try {
+      const q = query(availabilityRef, orderBy('date'), orderBy('time'))
+      querySnapshot = await getDocs(q)
+    } catch (orderError) {
+      // Si falla el ordenamiento (por ejemplo, si no hay índice), obtener todos sin ordenar
+      console.warn('Error al ordenar slots por date y time (posiblemente falta índice). Obteniendo sin ordenar.')
+      querySnapshot = await getDocs(availabilityRef)
+    }
+    
     const slots = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as AvailableSlot[]
-    return slots.filter(slot => slot.date === date && slot.available)
+    
+    // Filtrar por fecha y disponibilidad, luego ordenar en el cliente
+    const filteredSlots = slots.filter(slot => slot.date === date && slot.available)
+    return filteredSlots.sort((a, b) => a.time.localeCompare(b.time))
   } catch (error) {
     console.error('Error getting available slots by date:', error)
     throw error

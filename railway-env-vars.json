@@ -1,0 +1,17 @@
+{
+  "NEXT_PUBLIC_FIREBASE_API_KEY": "AIzaSyC3dJcHoxfV-kvyRi5XjCDyEsjzDoc2bjM",
+  "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "arabiyat-5f5f0.firebaseapp.com",
+  "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "arabiyat-5f5f0",
+  "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET": "arabiyat-5f5f0.firebasestorage.app",
+  "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "374476174162",
+  "NEXT_PUBLIC_FIREBASE_APP_ID": "1:374476174162:web:c356cd629d5f34e25b808b",
+  "B2_KEY_ID": "005c2b526be0baa0000000022",
+  "B2_APPLICATION_KEY": "K0050th3Izw948pBo5EwyO0uYP4kEdg",
+  "B2_BUCKET_NAME": "arabiyat",
+  "B2_BUCKET_ID": "dcd2cbc5c2468bee90ab0a1a",
+  "B2_ENDPOINT": "https://s3.us-east-005.backblazeb2.com",
+  "B2_REGION": "us-east-005",
+  "NEXT_PUBLIC_WHATSAPP_NUMBER": "2017084725",
+  "NODE_ENV": "production"
+}
+
