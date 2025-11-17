@@ -14,6 +14,9 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Usar URL directa de B2 para mejor compatibilidad con iOS/Safari
+  const videoUrl = getVideoUrl(video.videoUrl)
+
   useEffect(() => {
     // Prevenir scroll del body cuando el modal está abierto
     document.body.style.overflow = 'hidden'
@@ -38,22 +41,22 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
     }
 
     // Intentar reproducir cuando el video esté listo
-    const video = videoRef.current
-    if (video) {
+    const videoElement = videoRef.current
+    if (videoElement) {
       const handleCanPlay = () => {
         playVideo()
       }
       
-      video.addEventListener('canplay', handleCanPlay)
+      videoElement.addEventListener('canplay', handleCanPlay)
       
       // También intentar inmediatamente si el video ya está listo
-      if (video.readyState >= 3) {
+      if (videoElement.readyState >= 3) {
         playVideo()
       }
 
       return () => {
-        video.removeEventListener('canplay', handleCanPlay)
-        video.pause()
+        videoElement.removeEventListener('canplay', handleCanPlay)
+        videoElement.pause()
       }
     }
   }, [videoUrl])
@@ -81,9 +84,6 @@ export default function VideoModal({ video, onClose }: VideoModalProps) {
       setError(errorMessage)
     }
   }
-
-  // Usar URL directa de B2 para mejor compatibilidad con iOS/Safari
-  const videoUrl = getVideoUrl(video.videoUrl)
 
   return (
     <div
