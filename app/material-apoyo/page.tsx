@@ -107,7 +107,7 @@ export default function MaterialApoyo() {
           )}
 
           {!loading && !error && materials.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2">
               {materials.map((material, index) => {
                 const thumbnailUrl = material.thumbnailUrl 
                   ? (material.thumbnailUrl.startsWith('/api/b2') 
@@ -124,10 +124,10 @@ export default function MaterialApoyo() {
                     key={material.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.05 }}
                     className="rounded-lg overflow-hidden"
                     style={{ backgroundColor: '#344A3D' }}
-                    whileHover={{ scale: 1.02, y: -4 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
                   >
                     {thumbnailUrl && (
                       <div className="aspect-video overflow-hidden" style={{ backgroundColor: '#000000' }}>
@@ -146,7 +146,7 @@ export default function MaterialApoyo() {
                             />
                             <div className="absolute inset-0 flex items-center justify-center">
                               <svg
-                                className="w-16 h-16"
+                                className="w-8 h-8"
                                 style={{ color: '#D4AF37' }}
                                 fill="currentColor"
                                 viewBox="0 0 24 24"
@@ -158,7 +158,7 @@ export default function MaterialApoyo() {
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <svg
-                              className="w-16 h-16"
+                              className="w-8 h-8"
                               style={{ color: '#D4AF37' }}
                               fill="none"
                               stroke="currentColor"
@@ -171,9 +171,9 @@ export default function MaterialApoyo() {
                       </div>
                     )}
                     
-                    <div className="p-4">
+                    <div className="p-2">
                       <h3 
-                        className="text-lg font-semibold mb-2"
+                        className="text-xs font-semibold mb-1 line-clamp-2"
                         style={{ color: '#D4AF37' }}
                       >
                         {material.title}
@@ -181,24 +181,24 @@ export default function MaterialApoyo() {
                       
                       {material.description && (
                         <p 
-                          className="text-sm mb-3"
+                          className="text-xs mb-2 line-clamp-2"
                           style={{ color: '#F8F5EF', opacity: 0.8 }}
                         >
                           {material.description}
                         </p>
                       )}
                       
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col gap-1">
                         <div className="text-xs" style={{ color: '#F8F5EF', opacity: 0.6 }}>
-                          <span className="capitalize">{material.fileType}</span>
+                          <span className="capitalize text-[10px]">{material.fileType}</span>
                           {material.fileSize && (
-                            <span className="ml-2">• {formatFileSize(material.fileSize)}</span>
+                            <span className="ml-1 text-[10px]">• {formatFileSize(material.fileSize)}</span>
                           )}
                         </div>
                         
                         <motion.button
                           onClick={() => handleDownload(material)}
-                          className="px-4 py-2 rounded-lg font-medium text-sm"
+                          className="px-2 py-1 rounded text-xs font-medium w-full"
                           style={{ 
                             backgroundColor: '#D4AF37',
                             color: '#000000',
