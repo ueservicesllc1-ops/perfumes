@@ -135,6 +135,28 @@ service cloud.firestore {
       allow delete: if request.auth != null;
     }
     
+    // Reglas para la colección de material de apoyo
+    match /materials/{materialId} {
+      // Permitir lectura pública (cualquiera puede ver el material)
+      allow read: if true;
+      
+      // TEMPORAL: Permitir creación sin autenticación para poblar base de datos
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow create: if request.resource.data.keys().hasAll(['title', 'fileUrl', 'fileType', 'fileName'])
+        && request.resource.data.title is string
+        && request.resource.data.fileUrl is string
+        && request.resource.data.fileType is string
+        && request.resource.data.fileName is string;
+      
+      // TEMPORAL: Permitir actualización sin autenticación
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow update: if true;
+      
+      // TEMPORAL: Permitir eliminación sin autenticación para el admin
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow delete: if true;
+    }
+    
     // Denegar acceso a todo lo demás por defecto
     match /{document=**} {
       allow read, write: if false;

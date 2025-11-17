@@ -6,17 +6,21 @@ import { signIn, signInWithGoogle, getCurrentUser, logOut } from '@/lib/firebase
 import { getAllPerfumes } from '@/lib/firebase/perfumes'
 import { getAllVideos } from '@/lib/firebase/videos'
 import { getAvailableSlots, deleteAvailableSlot } from '@/lib/firebase/availability'
+import { getAllMaterials } from '@/lib/firebase/materials'
 import type { Perfume } from '@/lib/firebase/perfumes'
 import type { Video } from '@/lib/firebase/videos'
 import type { AvailableSlot } from '@/lib/firebase/availability'
+import type { Material } from '@/lib/firebase/materials'
 import AdminProductList from '@/components/admin/AdminProductList'
 import AdminProductForm from '@/components/admin/AdminProductForm'
 import AdminVideoList from '@/components/admin/AdminVideoList'
 import AdminVideoForm from '@/components/admin/AdminVideoForm'
 import AdminAvailabilityList from '@/components/admin/AdminAvailabilityList'
 import AdminAvailabilityForm from '@/components/admin/AdminAvailabilityForm'
+import AdminMaterialList from '@/components/admin/AdminMaterialList'
+import AdminMaterialForm from '@/components/admin/AdminMaterialForm'
 
-type AdminSection = 'menu' | 'products' | 'videos' | 'availability'
+type AdminSection = 'menu' | 'products' | 'videos' | 'availability' | 'materials'
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null)
@@ -35,6 +39,9 @@ export default function AdminPage() {
   const [slots, setSlots] = useState<AvailableSlot[]>([])
   const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null)
   const [showAvailabilityForm, setShowAvailabilityForm] = useState(false)
+  const [materials, setMaterials] = useState<Material[]>([])
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null)
+  const [showMaterialForm, setShowMaterialForm] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -49,6 +56,8 @@ export default function AdminPage() {
         loadVideos()
       } else if (section === 'availability') {
         loadSlots()
+      } else if (section === 'materials') {
+        loadMaterials()
       }
     }
   }, [user, section])
@@ -108,6 +117,9 @@ export default function AdminPage() {
       setSlots([])
       setSelectedSlot(null)
       setShowAvailabilityForm(false)
+      setMaterials([])
+      setSelectedMaterial(null)
+      setShowMaterialForm(false)
       setSection('menu')
     } catch (error) {
       console.error('Error al cerrar sesión:', error)
@@ -138,6 +150,15 @@ export default function AdminPage() {
       setSlots(data)
     } catch (error) {
       console.error('Error cargando horarios:', error)
+    }
+  }
+
+  async function loadMaterials() {
+    try {
+      const data = await getAllMaterials()
+      setMaterials(data)
+    } catch (error) {
+      console.error('Error cargando materiales:', error)
     }
   }
 
@@ -208,6 +229,26 @@ export default function AdminPage() {
 
   async function handleDeleteSlot(id: string) {
     await deleteAvailableSlot(id)
+  }
+
+  function handleEditMaterial(material: Material) {
+    setSelectedMaterial(material)
+    setShowMaterialForm(true)
+  }
+
+  function handleNewMaterial() {
+    setSelectedMaterial(null)
+    setShowMaterialForm(true)
+  }
+
+  function handleMaterialFormClose() {
+    setShowMaterialForm(false)
+    setSelectedMaterial(null)
+  }
+
+  function handleMaterialFormSuccess() {
+    loadMaterials()
+    handleMaterialFormClose()
   }
 
   if (loading) {
@@ -348,9 +389,11 @@ export default function AdminPage() {
                   setShowProductForm(false)
                   setShowVideoForm(false)
                   setShowAvailabilityForm(false)
+                  setShowMaterialForm(false)
                   setSelectedPerfume(null)
                   setSelectedVideo(null)
                   setSelectedSlot(null)
+                  setSelectedMaterial(null)
                 }}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
                 style={{ backgroundColor: '#2a2a2a', color: '#D4AF37', border: '1px solid #444' }}
@@ -385,14 +428,25 @@ export default function AdminPage() {
                 + Nuevo
               </button>
             )}
-            {(showProductForm || showVideoForm || showAvailabilityForm) && (
+            {section === 'materials' && !showMaterialForm && (
+              <button
+                onClick={handleNewMaterial}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
+                style={{ backgroundColor: '#D4AF37', color: '#000000' }}
+              >
+                + Nuevo
+              </button>
+            )}
+            {(showProductForm || showVideoForm || showAvailabilityForm || showMaterialForm) && (
               <button
                 onClick={
                   showProductForm 
                     ? handleProductFormClose 
                     : showVideoForm 
                     ? handleVideoFormClose 
-                    : handleAvailabilityFormClose
+                    : showAvailabilityForm
+                    ? handleAvailabilityFormClose
+                    : handleMaterialFormClose
                 }
                 className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
                 style={{ backgroundColor: '#2a2a2a', color: '#D4AF37', border: '1px solid #444' }}
@@ -462,6 +516,20 @@ export default function AdminPage() {
               </svg>
               <span className="text-lg">Horarios</span>
             </button>
+            <button
+              onClick={() => setSection('materials')}
+              className="w-full py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+              style={{ 
+                backgroundColor: '#2a2a2a', 
+                border: '2px solid #D4AF37',
+                color: '#D4AF37'
+              }}
+            >
+              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="text-lg">Material de Apoyo</span>
+            </button>
           </div>
         ) : section === 'products' ? (
           showProductForm ? (
@@ -505,6 +573,20 @@ export default function AdminPage() {
               onDelete={handleDeleteSlot}
               onRefresh={loadSlots}
               onNewSlot={handleNewSlot}
+            />
+          )
+        ) : section === 'materials' ? (
+          showMaterialForm ? (
+            <AdminMaterialForm
+              material={selectedMaterial}
+              onClose={handleMaterialFormClose}
+              onSuccess={handleMaterialFormSuccess}
+            />
+          ) : (
+            <AdminMaterialList
+              materials={materials}
+              onEdit={handleEditMaterial}
+              onRefresh={loadMaterials}
             />
           )
         ) : null}
