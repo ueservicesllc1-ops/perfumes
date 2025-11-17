@@ -200,20 +200,17 @@ export default function AdminVideoForm({ video, onClose, onSuccess }: AdminVideo
         <div className="p-4 rounded-lg" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
           <h3 className="text-sm font-semibold mb-3" style={{ color: '#D4AF37' }}>Video</h3>
           
-          {/* Advertencia importante sobre formato */}
+          {/* Información sobre conversión automática */}
           <div className="mb-3 p-3 rounded" style={{ backgroundColor: '#1a1a1a', border: '1px solid #D4AF37' }}>
             <p className="text-xs font-semibold mb-1" style={{ color: '#D4AF37' }}>
-              ⚠️ IMPORTANTE: Formato de Video
+              ✅ Conversión Automática a H.264
             </p>
             <p className="text-xs mb-1" style={{ color: '#FFFFFF' }}>
-              Los videos <strong>DEBEN estar en formato H.264 (MP4)</strong> para funcionar en móviles.
+              Los videos se convertirán <strong>automáticamente a formato H.264 (MP4)</strong> al subirlos.
             </p>
             <p className="text-xs" style={{ color: '#999' }}>
-              Si tu video está en H.265/HEVC, conviértelo primero con:
+              Esto asegura compatibilidad con todos los dispositivos móviles. El proceso puede tardar unos minutos dependiendo del tamaño del video.
             </p>
-            <code className="text-xs block mt-1 p-2 rounded" style={{ backgroundColor: '#000000', color: '#D4AF37' }}>
-              ffmpeg -i video.mp4 -vcodec libx264 -acodec aac -strict -2 video_h264.mp4
-            </code>
           </div>
           
           {formData.videoUrl && (
