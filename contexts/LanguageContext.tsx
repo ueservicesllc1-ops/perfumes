@@ -77,6 +77,16 @@ const translations: Record<Language, Record<string, string>> = {
     'catalog.brands': 'Marcas',
     'catalog.collections': 'Colecciones',
     
+    // Material de Apoyo
+    'material.loading': 'Cargando material...',
+    'material.noAvailable': 'No hay material de apoyo disponible.',
+    'material.errorLoading': 'Error al cargar el material de apoyo',
+    'material.videos': 'Videos',
+    'material.photos': 'Fotos',
+    'material.pdfs': 'PDFs',
+    'material.others': 'Otros',
+    'material.enlargedImage': 'Imagen ampliada',
+    
     // Otros
     'button.download': 'Descargar',
     'button.close': 'Cerrar',
@@ -145,6 +155,16 @@ const translations: Record<Language, Record<string, string>> = {
     'catalog.categories': 'Categories',
     'catalog.brands': 'Brands',
     'catalog.collections': 'Collections',
+    
+    // Material de Apoyo
+    'material.loading': 'Loading material...',
+    'material.noAvailable': 'No support material available.',
+    'material.errorLoading': 'Error loading support material',
+    'material.videos': 'Videos',
+    'material.photos': 'Photos',
+    'material.pdfs': 'PDFs',
+    'material.others': 'Others',
+    'material.enlargedImage': 'Enlarged image',
     
     // Others
     'button.download': 'Download',

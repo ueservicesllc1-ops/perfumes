@@ -7,8 +7,10 @@ import Footer from '@/components/Footer'
 import { getAllMaterials } from '@/lib/firebase/materials'
 import type { Material } from '@/lib/firebase/materials'
 import { getImageUrl, getVideoUrl } from '@/lib/b2/storage'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function MaterialApoyo() {
+  const { t } = useLanguage()
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +28,7 @@ export default function MaterialApoyo() {
       setError(null)
     } catch (err: any) {
       console.error('Error loading materials:', err)
-      setError(err.message || 'Error al cargar el material de apoyo')
+      setError(err.message || t('material.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -183,7 +185,7 @@ export default function MaterialApoyo() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Descargar
+              {t('button.download')}
             </motion.button>
           </div>
         </div>
@@ -205,12 +207,12 @@ export default function MaterialApoyo() {
             className="text-2xl font-bold mb-6 text-center"
             style={{ color: '#D4AF37' }}
           >
-            Material de Apoyo
+            {t('nav.material')}
           </h1>
 
           {loading && (
             <div className="text-center py-12">
-              <p style={{ color: '#F8F5EF' }}>Cargando material...</p>
+              <p style={{ color: '#F8F5EF' }}>{t('material.loading')}</p>
             </div>
           )}
 
@@ -222,7 +224,7 @@ export default function MaterialApoyo() {
 
           {!loading && !error && materials.length === 0 && (
             <div className="text-center py-12">
-              <p style={{ color: '#F8F5EF' }}>No hay material de apoyo disponible.</p>
+              <p style={{ color: '#F8F5EF' }}>{t('material.noAvailable')}</p>
             </div>
           )}
 
@@ -243,7 +245,7 @@ export default function MaterialApoyo() {
                     transition={{ duration: 0.5 }}
                   >
                     <h2 className="text-lg font-bold mb-3" style={{ color: '#D4AF37' }}>
-                      Videos
+                      {t('material.videos')}
                     </h2>
                     <div className="grid grid-cols-2 gap-2">
                       {videos.map((material, index) => {
@@ -261,7 +263,7 @@ export default function MaterialApoyo() {
                     transition={{ duration: 0.5, delay: 0.1 }}
                   >
                     <h2 className="text-lg font-bold mb-3" style={{ color: '#D4AF37' }}>
-                      Fotos
+                      {t('material.photos')}
                     </h2>
                     <div className="grid grid-cols-2 gap-2">
                       {fotos.map((material, index) => {
@@ -279,7 +281,7 @@ export default function MaterialApoyo() {
                     transition={{ duration: 0.5, delay: 0.2 }}
                   >
                     <h2 className="text-lg font-bold mb-3" style={{ color: '#D4AF37' }}>
-                      PDFs
+                      {t('material.pdfs')}
                     </h2>
                     <div className="grid grid-cols-2 gap-2">
                       {pdfs.map((material, index) => {
@@ -297,7 +299,7 @@ export default function MaterialApoyo() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                   >
                     <h2 className="text-lg font-bold mb-3" style={{ color: '#D4AF37' }}>
-                      Otros
+                      {t('material.others')}
                     </h2>
                     <div className="grid grid-cols-2 gap-2">
                       {otros.map((material, index) => {
@@ -356,7 +358,7 @@ export default function MaterialApoyo() {
             {/* Imagen */}
             <img
               src={selectedImage}
-              alt="Imagen ampliada"
+              alt={t('material.enlargedImage')}
               className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
             />
           </motion.div>
