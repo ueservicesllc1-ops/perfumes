@@ -71,6 +71,112 @@ export default function MaterialApoyo() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
+  function renderMaterialCard(material: Material, index: number) {
+    const thumbnailUrl = material.thumbnailUrl 
+      ? (material.thumbnailUrl.startsWith('/api/b2') 
+          ? material.thumbnailUrl 
+          : getImageUrl(material.thumbnailUrl))
+      : material.fileType === 'image' 
+        ? (material.fileUrl.startsWith('/api/b2') 
+            ? material.fileUrl 
+            : getImageUrl(material.fileUrl))
+        : null
+
+    return (
+      <motion.div
+        key={material.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.05 }}
+        className="rounded-lg overflow-hidden"
+        style={{ backgroundColor: '#344A3D' }}
+        whileHover={{ scale: 1.02, y: -2 }}
+      >
+        {thumbnailUrl && (
+          <div className="aspect-video overflow-hidden" style={{ backgroundColor: '#000000' }}>
+            {material.fileType === 'image' ? (
+              <img
+                src={thumbnailUrl}
+                alt={material.title}
+                className="w-full h-full object-cover"
+              />
+            ) : material.fileType === 'video' ? (
+              <div className="w-full h-full flex items-center justify-center relative">
+                <img
+                  src={thumbnailUrl}
+                  alt={material.title}
+                  className="w-full h-full object-cover opacity-50"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8"
+                    style={{ color: '#D4AF37' }}
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <svg
+                  className="w-8 h-8"
+                  style={{ color: '#D4AF37' }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div className="p-2">
+          <h3 
+            className="text-xs font-semibold mb-1 line-clamp-2"
+            style={{ color: '#D4AF37' }}
+          >
+            {material.title}
+          </h3>
+          
+          {material.description && (
+            <p 
+              className="text-xs mb-2 line-clamp-2"
+              style={{ color: '#F8F5EF', opacity: 0.8 }}
+            >
+              {material.description}
+            </p>
+          )}
+          
+          <div className="flex flex-col gap-1">
+            <div className="text-xs" style={{ color: '#F8F5EF', opacity: 0.6 }}>
+              <span className="capitalize text-[10px]">{material.fileType}</span>
+              {material.fileSize && (
+                <span className="ml-1 text-[10px]">• {formatFileSize(material.fileSize)}</span>
+              )}
+            </div>
+            
+            <motion.button
+              onClick={() => handleDownload(material)}
+              className="px-2 py-1 rounded text-xs font-medium w-full"
+              style={{ 
+                backgroundColor: '#D4AF37',
+                color: '#000000',
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Descargar
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#182B21', paddingTop: '60px', paddingBottom: '80px' }}>
       <Header />
@@ -106,115 +212,89 @@ export default function MaterialApoyo() {
             </div>
           )}
 
-          {!loading && !error && materials.length > 0 && (
-            <div className="grid grid-cols-2 gap-2">
-              {materials.map((material, index) => {
-                const thumbnailUrl = material.thumbnailUrl 
-                  ? (material.thumbnailUrl.startsWith('/api/b2') 
-                      ? material.thumbnailUrl 
-                      : getImageUrl(material.thumbnailUrl))
-                  : material.fileType === 'image' 
-                    ? (material.fileUrl.startsWith('/api/b2') 
-                        ? material.fileUrl 
-                        : getImageUrl(material.fileUrl))
-                    : null
+          {!loading && !error && materials.length > 0 && (() => {
+            // Separar materiales por tipo
+            const videos = materials.filter(m => m.fileType === 'video')
+            const fotos = materials.filter(m => m.fileType === 'image')
+            const pdfs = materials.filter(m => m.fileType === 'pdf')
+            const otros = materials.filter(m => m.fileType === 'other')
 
-                return (
+            return (
+              <div className="space-y-6">
+                {/* Sección de Videos */}
+                {videos.length > 0 && (
                   <motion.div
-                    key={material.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="rounded-lg overflow-hidden"
-                    style={{ backgroundColor: '#344A3D' }}
-                    whileHover={{ scale: 1.02, y: -2 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    {thumbnailUrl && (
-                      <div className="aspect-video overflow-hidden" style={{ backgroundColor: '#000000' }}>
-                        {material.fileType === 'image' ? (
-                          <img
-                            src={thumbnailUrl}
-                            alt={material.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : material.fileType === 'video' ? (
-                          <div className="w-full h-full flex items-center justify-center relative">
-                            <img
-                              src={thumbnailUrl}
-                              alt={material.title}
-                              className="w-full h-full object-cover opacity-50"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <svg
-                                className="w-8 h-8"
-                                style={{ color: '#D4AF37' }}
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <svg
-                              className="w-8 h-8"
-                              style={{ color: '#D4AF37' }}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    <div className="p-2">
-                      <h3 
-                        className="text-xs font-semibold mb-1 line-clamp-2"
-                        style={{ color: '#D4AF37' }}
-                      >
-                        {material.title}
-                      </h3>
-                      
-                      {material.description && (
-                        <p 
-                          className="text-xs mb-2 line-clamp-2"
-                          style={{ color: '#F8F5EF', opacity: 0.8 }}
-                        >
-                          {material.description}
-                        </p>
-                      )}
-                      
-                      <div className="flex flex-col gap-1">
-                        <div className="text-xs" style={{ color: '#F8F5EF', opacity: 0.6 }}>
-                          <span className="capitalize text-[10px]">{material.fileType}</span>
-                          {material.fileSize && (
-                            <span className="ml-1 text-[10px]">• {formatFileSize(material.fileSize)}</span>
-                          )}
-                        </div>
-                        
-                        <motion.button
-                          onClick={() => handleDownload(material)}
-                          className="px-2 py-1 rounded text-xs font-medium w-full"
-                          style={{ 
-                            backgroundColor: '#D4AF37',
-                            color: '#000000',
-                          }}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          Descargar
-                        </motion.button>
-                      </div>
+                    <h2 className="text-lg font-bold mb-3" style={{ color: '#D4AF37' }}>
+                      Videos
+                    </h2>
+                    <div className="grid grid-cols-2 gap-2">
+                      {videos.map((material, index) => {
+                        return renderMaterialCard(material, index)
+                      })}
                     </div>
                   </motion.div>
-                )
-              })}
-            </div>
-          )}
+                )}
+
+                {/* Sección de Fotos */}
+                {fotos.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                  >
+                    <h2 className="text-lg font-bold mb-3" style={{ color: '#D4AF37' }}>
+                      Fotos
+                    </h2>
+                    <div className="grid grid-cols-2 gap-2">
+                      {fotos.map((material, index) => {
+                        return renderMaterialCard(material, index)
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Sección de PDFs */}
+                {pdfs.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <h2 className="text-lg font-bold mb-3" style={{ color: '#D4AF37' }}>
+                      PDFs
+                    </h2>
+                    <div className="grid grid-cols-2 gap-2">
+                      {pdfs.map((material, index) => {
+                        return renderMaterialCard(material, index)
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Sección de Otros */}
+                {otros.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                  >
+                    <h2 className="text-lg font-bold mb-3" style={{ color: '#D4AF37' }}>
+                      Otros
+                    </h2>
+                    <div className="grid grid-cols-2 gap-2">
+                      {otros.map((material, index) => {
+                        return renderMaterialCard(material, index)
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            )
+          })()}
         </motion.div>
       </main>
 
