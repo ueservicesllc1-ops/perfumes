@@ -3,10 +3,13 @@
 import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function InformacionEnvio() {
+  const { currentTheme } = useTheme()
+  
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#182B21', paddingTop: '60px', paddingBottom: '80px' }}>
+    <div className="min-h-screen" style={{ backgroundColor: currentTheme.colors.background, paddingTop: '60px', paddingBottom: '80px' }}>
       <Header />
       
       <main className="max-w-4xl mx-auto px-4 py-8">
@@ -17,16 +20,16 @@ export default function InformacionEnvio() {
         >
           <h1 
             className="text-2xl font-bold mb-6 text-center"
-            style={{ color: '#D4AF37' }}
+            style={{ color: currentTheme.colors.accent }}
           >
             Información de Envío
           </h1>
 
           <div 
             className="p-6 rounded-lg space-y-4"
-            style={{ backgroundColor: '#344A3D' }}
+            style={{ backgroundColor: currentTheme.colors.surface }}
           >
-            <p style={{ color: '#F8F5EF', lineHeight: '1.8' }}>
+            <p style={{ color: currentTheme.colors.text, lineHeight: '1.8' }}>
               Aquí va la información sobre envíos...
             </p>
           </div>

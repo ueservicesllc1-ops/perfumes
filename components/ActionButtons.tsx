@@ -4,20 +4,25 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { RectangleStackIcon, StarIcon, TicketIcon } from '@heroicons/react/24/outline'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useTheme, getIconColor } from '@/contexts/ThemeContext'
 
 export default function ActionButtons() {
   const router = useRouter()
   const { t } = useLanguage()
+  const { currentTheme } = useTheme()
+  
+  // Calcular el color del icono con buen contraste sobre el surface
+  const iconColor = getIconColor(currentTheme.colors.surface, currentTheme.colors.accent)
   
   return (
-    <div className="w-full px-4 py-4" style={{ backgroundColor: '#182B21', marginTop: '-20px' }}>
+    <div className="w-full px-4 py-4" style={{ backgroundColor: currentTheme.colors.background, marginTop: '-20px' }}>
       <div className="max-w-sm mx-auto grid grid-cols-3 gap-3">
         {/* Botón Colección */}
         <motion.button 
           onClick={() => router.push('/catalogo')}
           className="rounded-lg p-4 flex flex-col items-center justify-center space-y-2" 
           style={{ 
-            backgroundColor: '#344A3D', 
+            backgroundColor: currentTheme.colors.surface, 
             border: 'none',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
           }}
@@ -27,7 +32,7 @@ export default function ActionButtons() {
           whileHover={{ 
             scale: 1.05,
             y: -4,
-            boxShadow: '0 8px 20px rgba(212, 175, 55, 0.4)',
+            boxShadow: `0 8px 20px ${currentTheme.colors.accent}40`,
             transition: { duration: 0.3 }
           }}
           whileTap={{ scale: 0.95 }}
@@ -38,10 +43,10 @@ export default function ActionButtons() {
           >
             <RectangleStackIcon 
               className="w-7 h-7"
-              style={{ color: '#D4AF37', strokeWidth: 2 }}
+              style={{ color: iconColor, strokeWidth: 2 }}
             />
           </motion.div>
-          <span className="text-xs font-medium tracking-wide uppercase" style={{ color: '#D4AF37', letterSpacing: '0.08em' }}>
+          <span className="text-xs font-medium tracking-wide uppercase" style={{ color: iconColor, letterSpacing: '0.08em' }}>
             {t('home.collection')}
           </span>
         </motion.button>
@@ -50,7 +55,7 @@ export default function ActionButtons() {
         <motion.button 
           className="rounded-lg p-4 flex flex-col items-center justify-center space-y-2" 
           style={{ 
-            backgroundColor: '#344A3D', 
+            backgroundColor: currentTheme.colors.surface, 
             border: 'none',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
           }}
@@ -60,7 +65,7 @@ export default function ActionButtons() {
           whileHover={{ 
             scale: 1.05,
             y: -4,
-            boxShadow: '0 8px 20px rgba(212, 175, 55, 0.4)',
+            boxShadow: `0 8px 20px ${currentTheme.colors.accent}40`,
             transition: { duration: 0.3 }
           }}
           whileTap={{ scale: 0.95 }}
@@ -71,10 +76,10 @@ export default function ActionButtons() {
           >
             <StarIcon 
               className="w-7 h-7"
-              style={{ color: '#D4AF37', strokeWidth: 2 }}
+              style={{ color: iconColor, strokeWidth: 2 }}
             />
           </motion.div>
-          <span className="text-xs font-medium tracking-wide uppercase" style={{ color: '#D4AF37', letterSpacing: '0.08em' }}>
+          <span className="text-xs font-medium tracking-wide uppercase" style={{ color: iconColor, letterSpacing: '0.08em' }}>
             {t('home.new')}
           </span>
         </motion.button>
@@ -83,7 +88,7 @@ export default function ActionButtons() {
         <motion.button 
           className="rounded-lg p-4 flex flex-col items-center justify-center space-y-2" 
           style={{ 
-            backgroundColor: '#344A3D', 
+            backgroundColor: currentTheme.colors.surface, 
             border: 'none',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
           }}
@@ -93,7 +98,7 @@ export default function ActionButtons() {
           whileHover={{ 
             scale: 1.05,
             y: -4,
-            boxShadow: '0 8px 20px rgba(212, 175, 55, 0.4)',
+            boxShadow: `0 8px 20px ${currentTheme.colors.accent}40`,
             transition: { duration: 0.3 }
           }}
           whileTap={{ scale: 0.95 }}
@@ -104,10 +109,10 @@ export default function ActionButtons() {
           >
             <TicketIcon 
               className="w-7 h-7"
-              style={{ color: '#D4AF37', strokeWidth: 2 }}
+              style={{ color: iconColor, strokeWidth: 2 }}
             />
           </motion.div>
-          <span className="text-xs font-medium tracking-wide uppercase" style={{ color: '#D4AF37', letterSpacing: '0.08em' }}>
+          <span className="text-xs font-medium tracking-wide uppercase" style={{ color: iconColor, letterSpacing: '0.08em' }}>
             {t('home.offers')}
           </span>
         </motion.button>

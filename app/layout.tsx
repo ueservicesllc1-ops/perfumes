@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { CartProvider } from '@/contexts/CartContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import LanguageUpdater from '@/components/LanguageUpdater'
+import ThemeUpdater from '@/components/ThemeUpdater'
 
 export const metadata: Metadata = {
   title: 'Arabiyat - App Móvil',
@@ -40,6 +41,7 @@ export default function RootLayout({
       </head>
       <body style={{ backgroundColor: '#FFFFFF', margin: 0, padding: 0 }}>
         <ThemeProvider>
+          <ThemeUpdater />
           <LanguageProvider>
             <LanguageUpdater />
             <CartProvider>

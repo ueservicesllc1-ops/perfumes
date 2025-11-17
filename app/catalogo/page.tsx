@@ -9,10 +9,12 @@ import PerfumeImage from '@/components/PerfumeImage'
 import { usePerfumes } from '@/hooks/usePerfumes'
 import { useCart } from '@/contexts/CartContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useTheme, isDarkColor, getButtonTextColor, getIconColor } from '@/contexts/ThemeContext'
 import type { Perfume } from '@/lib/firebase/perfumes'
 
 export default function Catalogo() {
   const { t } = useLanguage()
+  const { currentTheme } = useTheme()
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos')
   const [selectedBrand, setSelectedBrand] = useState<string>('Todas')
   const [selectedCollection, setSelectedCollection] = useState<string>('Todas')
@@ -147,7 +149,7 @@ export default function Catalogo() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
+    <div className="min-h-screen" style={{ backgroundColor: currentTheme.colors.background, color: currentTheme.colors.text }}>
       <Header />
       
       <main className="max-w-sm mx-auto pt-16 px-4 pb-24">
@@ -160,7 +162,7 @@ export default function Catalogo() {
         >
           <motion.h1 
             className="text-2xl font-bold text-center mb-2" 
-            style={{ color: '#D4AF37' }}
+            style={{ color: currentTheme.colors.accent }}
             whileHover={{ scale: 1.05 }}
           >
             {t('catalog.title')}
@@ -179,11 +181,11 @@ export default function Catalogo() {
                 }}
                 className="w-full px-4 py-3 rounded-none text-sm font-medium"
                 style={selectedCategory !== 'Todos' ? {
-                  backgroundColor: '#D4AF37',
-                  color: '#000000',
+                  backgroundColor: currentTheme.colors.accent,
+                  color: getButtonTextColor(currentTheme.colors.accent),
                 } : {
-                  backgroundColor: '#344A3D',
-                  color: '#D4AF37',
+                  backgroundColor: currentTheme.colors.surface,
+                  color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
                 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -204,8 +206,8 @@ export default function Catalogo() {
                 <div 
                   className="absolute top-full left-0 right-0 z-20 mt-1 rounded-none overflow-hidden"
                   style={{ 
-                    backgroundColor: '#344A3D',
-                    border: '1px solid #D4AF37',
+                    backgroundColor: currentTheme.colors.surface,
+                    border: `1px solid ${currentTheme.colors.accent}`,
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
                   }}
                 >
@@ -218,11 +220,11 @@ export default function Catalogo() {
                       }}
                       className="w-full px-4 py-3 text-left text-sm font-medium transition-all active:scale-95 border-b border-b-[#444] last:border-b-0"
                       style={selectedCategory === cat ? {
-                        backgroundColor: '#D4AF37',
-                        color: '#000000',
+                        backgroundColor: currentTheme.colors.accent,
+                        color: getButtonTextColor(currentTheme.colors.accent),
                       } : {
-                        backgroundColor: '#344A3D',
-                        color: '#D4AF37',
+                        backgroundColor: currentTheme.colors.surface,
+                        color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
                       }}
                     >
                       {cat === 'Todos' ? t('catalog.allCategories') : cat}
@@ -241,11 +243,11 @@ export default function Catalogo() {
                 }}
                 className="w-full px-4 py-3 rounded-none text-sm font-medium"
                 style={selectedBrand !== 'Todas' ? {
-                  backgroundColor: '#D4AF37',
-                  color: '#000000',
+                  backgroundColor: currentTheme.colors.accent,
+                  color: getButtonTextColor(currentTheme.colors.accent),
                 } : {
-                  backgroundColor: '#344A3D',
-                  color: '#D4AF37',
+                  backgroundColor: currentTheme.colors.surface,
+                  color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
                 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -266,8 +268,8 @@ export default function Catalogo() {
                 <div 
                   className="absolute top-full left-0 right-0 z-20 mt-1 rounded-none overflow-hidden max-h-64 overflow-y-auto"
                   style={{ 
-                    backgroundColor: '#344A3D',
-                    border: '1px solid #D4AF37',
+                    backgroundColor: currentTheme.colors.surface,
+                    border: `1px solid ${currentTheme.colors.accent}`,
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
                   }}
                 >
@@ -280,11 +282,11 @@ export default function Catalogo() {
                       }}
                       className="w-full px-4 py-3 text-left text-sm font-medium transition-all active:scale-95 border-b border-b-[#444] last:border-b-0"
                       style={selectedBrand === brand ? {
-                        backgroundColor: '#D4AF37',
-                        color: '#000000',
+                        backgroundColor: currentTheme.colors.accent,
+                        color: getButtonTextColor(currentTheme.colors.accent),
                       } : {
-                        backgroundColor: '#344A3D',
-                        color: '#D4AF37',
+                        backgroundColor: currentTheme.colors.surface,
+                        color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
                       }}
                     >
                       {brand === 'Todas' ? t('catalog.allBrands') : brand}
@@ -306,13 +308,13 @@ export default function Catalogo() {
                   onClick={() => setSelectedCollection(collection)}
                   className="px-4 py-2 rounded-none text-sm font-medium whitespace-nowrap"
                   style={selectedCollection === collection ? {
-                    backgroundColor: '#D4AF37',
-                    color: '#000000',
-                    boxShadow: '0 2px 8px rgba(212, 175, 55, 0.4)'
+                    backgroundColor: currentTheme.colors.accent,
+                    color: getButtonTextColor(currentTheme.colors.accent),
+                    boxShadow: `0 2px 8px ${currentTheme.colors.accent}40`
                   } : {
-                    backgroundColor: '#344A3D',
-                    color: '#D4AF37',
-                    border: '1px solid rgba(212, 175, 55, 0.3)'
+                    backgroundColor: currentTheme.colors.surface,
+                    color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
+                    border: `1px solid ${currentTheme.colors.accent}30`
                   }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -330,15 +332,15 @@ export default function Catalogo() {
         {/* Estado de carga */}
         {loading && (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#D4AF37' }}></div>
-            <p className="mt-4" style={{ color: '#999' }}>Cargando perfumes...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: currentTheme.colors.accent }}></div>
+            <p className="mt-4" style={{ color: currentTheme.colors.textSecondary }}>Cargando perfumes...</p>
           </div>
         )}
 
         {/* Error */}
         {error && !loading && (
-          <div className="rounded-lg p-4 mb-6" style={{ backgroundColor: 'rgba(212, 175, 55, 0.2)', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
-            <p className="text-sm" style={{ color: '#D4AF37' }}>
+          <div className="rounded-lg p-4 mb-6" style={{ backgroundColor: `${currentTheme.colors.accent}20`, border: `1px solid ${currentTheme.colors.accent}30` }}>
+            <p className="text-sm" style={{ color: currentTheme.colors.accent }}>
               Error al cargar perfumes. Mostrando datos locales.
             </p>
           </div>
@@ -349,7 +351,7 @@ export default function Catalogo() {
           <section className="mb-6">
             {filteredPerfumes.length === 0 ? (
               <div className="text-center py-12">
-                <p style={{ color: '#999' }}>No hay perfumes disponibles en esta categoría.</p>
+                <p style={{ color: currentTheme.colors.textSecondary }}>No hay perfumes disponibles en esta categoría.</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
@@ -364,7 +366,7 @@ export default function Catalogo() {
                       whileHover={{ 
                         y: -8,
                         scale: 1.02,
-                        boxShadow: '0 12px 30px rgba(212, 175, 55, 0.4)',
+                        boxShadow: `0 12px 30px ${currentTheme.colors.accent}40`,
                         transition: { duration: 0.3 }
                       }}
                       whileTap={{ scale: 0.98 }}
@@ -373,12 +375,12 @@ export default function Catalogo() {
                         href={`/producto/${perfume.id}`}
                         className="block overflow-hidden rounded-lg h-full flex flex-col"
                         style={{ 
-                          backgroundColor: '#344A3D',
+                          backgroundColor: currentTheme.colors.surface,
                           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
                         }}
                       >
                         {/* Imagen del perfume */}
-                        <div className="h-32 relative" style={{ backgroundColor: '#344A3D' }}>
+                        <div className="h-32 relative" style={{ backgroundColor: currentTheme.colors.surface }}>
                           <PerfumeImage 
                             imageUrl={perfume.imageUrl} 
                             perfumeName={perfume.name}
@@ -390,8 +392,8 @@ export default function Catalogo() {
                                 className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full"
                                 style={{ 
                                   backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                  color: '#D4AF37',
-                                  border: '1px solid #D4AF37'
+                                  color: currentTheme.colors.accent,
+                                  border: `1px solid ${currentTheme.colors.accent}`
                                 }}
                               >
                                 Agotado
@@ -403,8 +405,8 @@ export default function Catalogo() {
                               <span 
                                 className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full"
                                 style={{ 
-                                  backgroundColor: '#D4AF37',
-                                  color: '#000000'
+                                  backgroundColor: currentTheme.colors.accent,
+                                  color: isDarkColor(currentTheme.colors.accent) ? '#F8F5EF' : '#1F1F1F'
                                 }}
                               >
                                 Oferta
@@ -415,16 +417,16 @@ export default function Catalogo() {
 
                         {/* Información del perfume */}
                         <div className="p-2 flex-1 flex flex-col justify-between min-h-[80px]">
-                          <h3 className="font-medium text-[10px] mb-1 line-clamp-2 leading-tight" style={{ color: '#F8F5EF' }}>
+                          <h3 className="font-medium text-[10px] mb-1 line-clamp-2 leading-tight" style={{ color: currentTheme.colors.text }}>
                             {perfume.name}
                           </h3>
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center space-x-1 flex-wrap">
-                              <span className="text-[11px] font-bold" style={{ color: '#D4AF37' }}>
+                              <span className="text-[11px] font-bold" style={{ color: currentTheme.colors.accent }}>
                                 ${perfume.price.toFixed(2)}
                               </span>
                               {perfume.originalPrice && (
-                                <span className="text-[9px] line-through" style={{ color: '#666' }}>
+                                <span className="text-[9px] line-through" style={{ color: currentTheme.colors.textSecondary }}>
                                   ${perfume.originalPrice.toFixed(2)}
                                 </span>
                               )}
@@ -444,14 +446,14 @@ export default function Catalogo() {
                                   : 'cursor-not-allowed'
                               }`}
                               style={perfume.inStock ? {
-                                backgroundColor: '#D4AF37',
-                                color: '#000000',
+                                backgroundColor: currentTheme.colors.accent,
+                                color: getButtonTextColor(currentTheme.colors.accent),
                                 whiteSpace: 'nowrap',
                                 border: 'none',
                                 cursor: 'pointer'
                               } : {
-                                backgroundColor: '#333',
-                                color: '#666',
+                                backgroundColor: currentTheme.colors.surface,
+                                color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
                                 whiteSpace: 'nowrap',
                                 border: 'none'
                               }}

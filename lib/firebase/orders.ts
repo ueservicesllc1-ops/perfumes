@@ -7,6 +7,7 @@ import {
   orderBy,
   Timestamp 
 } from "firebase/firestore";
+import type { Timestamp as FirestoreTimestamp } from "firebase/firestore";
 import { db } from "./config";
 
 export interface OrderItem {
@@ -34,8 +35,8 @@ export interface Order {
     country: string;
   };
   paymentMethod: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: Date | FirestoreTimestamp | any;
+  updatedAt?: Date | FirestoreTimestamp | any;
 }
 
 const ORDERS_COLLECTION = "orders";

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useTheme } from '@/contexts/ThemeContext'
 import type { Video } from '@/lib/firebase/videos'
 import { getImageUrl } from '@/lib/b2/storage'
 import VideoModal from './VideoModal'
@@ -12,6 +13,7 @@ interface VideoGalleryProps {
 
 export default function VideoGallery({ videos }: VideoGalleryProps) {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const { currentTheme } = useTheme()
 
   // Mostrar solo los primeros 3 videos
   const displayVideos = videos.slice(0, 3)
@@ -37,7 +39,7 @@ export default function VideoGallery({ videos }: VideoGalleryProps) {
                 onClick={() => setSelectedVideo(video)}
                 className="flex-shrink-0 w-[calc(33.333%-8px)] aspect-[9/16] rounded-lg overflow-hidden relative group"
                 style={{
-                  backgroundColor: '#344A3D',
+                  backgroundColor: currentTheme.colors.surface,
                   border: 'none',
                   cursor: 'pointer',
                 }}
@@ -61,7 +63,7 @@ export default function VideoGallery({ videos }: VideoGalleryProps) {
                   <div className="w-full h-full flex items-center justify-center">
                     <svg
                       className="w-12 h-12"
-                      style={{ color: '#D4AF37' }}
+                      style={{ color: currentTheme.colors.accent }}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

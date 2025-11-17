@@ -19,8 +19,12 @@ import AdminAvailabilityList from '@/components/admin/AdminAvailabilityList'
 import AdminAvailabilityForm from '@/components/admin/AdminAvailabilityForm'
 import AdminMaterialList from '@/components/admin/AdminMaterialList'
 import AdminMaterialForm from '@/components/admin/AdminMaterialForm'
+import AdminNotificationList from '@/components/admin/AdminNotificationList'
+import AdminNotificationForm from '@/components/admin/AdminNotificationForm'
+import { getAllNotifications } from '@/lib/firebase/notifications'
+import type { Notification } from '@/lib/firebase/notifications'
 
-type AdminSection = 'menu' | 'products' | 'videos' | 'availability' | 'materials'
+type AdminSection = 'menu' | 'products' | 'videos' | 'availability' | 'materials' | 'notifications'
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null)
@@ -42,6 +46,9 @@ export default function AdminPage() {
   const [materials, setMaterials] = useState<Material[]>([])
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null)
   const [showMaterialForm, setShowMaterialForm] = useState(false)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
+  const [showNotificationForm, setShowNotificationForm] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -58,6 +65,8 @@ export default function AdminPage() {
         loadSlots()
       } else if (section === 'materials') {
         loadMaterials()
+      } else if (section === 'notifications') {
+        loadNotifications()
       }
     }
   }, [user, section])
@@ -162,6 +171,15 @@ export default function AdminPage() {
     }
   }
 
+  async function loadNotifications() {
+    try {
+      const data = await getAllNotifications()
+      setNotifications(data)
+    } catch (error) {
+      console.error('Error cargando notificaciones:', error)
+    }
+  }
+
   function handleEditProduct(perfume: Perfume) {
     setSelectedPerfume(perfume)
     setShowProductForm(true)
@@ -249,6 +267,26 @@ export default function AdminPage() {
   function handleMaterialFormSuccess() {
     loadMaterials()
     handleMaterialFormClose()
+  }
+
+  function handleEditNotification(notification: Notification) {
+    setSelectedNotification(notification)
+    setShowNotificationForm(true)
+  }
+
+  function handleNewNotification() {
+    setSelectedNotification(null)
+    setShowNotificationForm(true)
+  }
+
+  function handleNotificationFormClose() {
+    setShowNotificationForm(false)
+    setSelectedNotification(null)
+  }
+
+  function handleNotificationFormSuccess() {
+    loadNotifications()
+    handleNotificationFormClose()
   }
 
   if (loading) {
@@ -390,10 +428,12 @@ export default function AdminPage() {
                   setShowVideoForm(false)
                   setShowAvailabilityForm(false)
                   setShowMaterialForm(false)
+                  setShowNotificationForm(false)
                   setSelectedPerfume(null)
                   setSelectedVideo(null)
                   setSelectedSlot(null)
                   setSelectedMaterial(null)
+                  setSelectedNotification(null)
                 }}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
                 style={{ backgroundColor: '#2a2a2a', color: '#D4AF37', border: '1px solid #444' }}
@@ -437,7 +477,16 @@ export default function AdminPage() {
                 + Nuevo
               </button>
             )}
-            {(showProductForm || showVideoForm || showAvailabilityForm || showMaterialForm) && (
+            {section === 'notifications' && !showNotificationForm && (
+              <button
+                onClick={handleNewNotification}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
+                style={{ backgroundColor: '#D4AF37', color: '#000000' }}
+              >
+                + Nuevo
+              </button>
+            )}
+            {(showProductForm || showVideoForm || showAvailabilityForm || showMaterialForm || showNotificationForm) && (
               <button
                 onClick={
                   showProductForm 
@@ -446,7 +495,9 @@ export default function AdminPage() {
                     ? handleVideoFormClose 
                     : showAvailabilityForm
                     ? handleAvailabilityFormClose
-                    : handleMaterialFormClose
+                    : showMaterialForm
+                    ? handleMaterialFormClose
+                    : handleNotificationFormClose
                 }
                 className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
                 style={{ backgroundColor: '#2a2a2a', color: '#D4AF37', border: '1px solid #444' }}
@@ -530,6 +581,20 @@ export default function AdminPage() {
               </svg>
               <span className="text-lg">Material de Apoyo</span>
             </button>
+            <button
+              onClick={() => setSection('notifications')}
+              className="w-full py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+              style={{ 
+                backgroundColor: '#2a2a2a', 
+                border: '2px solid #D4AF37',
+                color: '#D4AF37'
+              }}
+            >
+              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span className="text-lg">Notificaciones</span>
+            </button>
           </div>
         ) : section === 'products' ? (
           showProductForm ? (
@@ -587,6 +652,20 @@ export default function AdminPage() {
               materials={materials}
               onEdit={handleEditMaterial}
               onRefresh={loadMaterials}
+            />
+          )
+        ) : section === 'notifications' ? (
+          showNotificationForm ? (
+            <AdminNotificationForm
+              notification={selectedNotification}
+              onClose={handleNotificationFormClose}
+              onSuccess={handleNotificationFormSuccess}
+            />
+          ) : (
+            <AdminNotificationList
+              notifications={notifications}
+              onEdit={handleEditNotification}
+              onRefresh={loadNotifications}
             />
           )
         ) : null}

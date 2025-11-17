@@ -5,11 +5,13 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useCart } from '@/contexts/CartContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function Footer() {
   const pathname = usePathname()
   const { totalItems } = useCart()
   const { t } = useLanguage()
+  const { currentTheme } = useTheme()
 
   const navItems = [
     {
@@ -31,7 +33,7 @@ export default function Footer() {
       ),
     },
     {
-      href: 'https://www.tiktok.com/@jcsellers',
+      href: 'https://www.tiktok.com/@jcrq2?_r=1&_t=ZT-91TvDBfjEsw',
       label: 'TikTok',
       icon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -65,8 +67,8 @@ export default function Footer() {
     <motion.footer 
       className="w-full fixed bottom-0 left-0 right-0 z-50"
       style={{ 
-        backgroundColor: '#000000',
-        borderTop: '1px solid #D4AF37',
+        backgroundColor: currentTheme.colors.footer,
+        borderTop: `1px solid ${currentTheme.colors.accent}`,
         padding: '0.75rem 0.5rem',
         minHeight: '60px',
         boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.5)',
@@ -84,7 +86,7 @@ export default function Footer() {
                 <div className="relative inline-block">
                   <div
                     style={{
-                      color: isActive ? '#D4AF37' : '#F8F5EF',
+                      color: isActive ? currentTheme.colors.accent : currentTheme.colors.footerText,
                       opacity: isActive ? 1 : 0.7,
                     }}
                   >
@@ -94,8 +96,8 @@ export default function Footer() {
                     <span
                       className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-[10px] font-bold z-10"
                       style={{
-                        backgroundColor: '#D4AF37',
-                        color: '#000000',
+                        backgroundColor: currentTheme.colors.accent,
+                        color: currentTheme.colors.footerText,
                         minWidth: '18px',
                         height: '18px',
                         padding: '0 4px',
@@ -109,7 +111,7 @@ export default function Footer() {
                 <span
                   className="text-[10px] font-medium"
                   style={{
-                    color: isActive ? '#D4AF37' : '#F8F5EF',
+                    color: isActive ? currentTheme.colors.accent : currentTheme.colors.footerText,
                     opacity: isActive ? 1 : 0.7,
                   }}
                 >

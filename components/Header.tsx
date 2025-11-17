@@ -5,11 +5,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useTheme } from '@/contexts/ThemeContext'
+import ThemeSelector from '@/components/ThemeSelector'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const { language, setLanguage, t } = useLanguage()
+  const { currentTheme } = useTheme()
 
   // Cerrar menú cuando cambia la ruta
   useEffect(() => {
@@ -135,7 +138,7 @@ export default function Header() {
       <motion.header 
         className="w-full fixed top-0 left-0 right-0 z-50"
         style={{ 
-          backgroundColor: '#000000',
+          backgroundColor: currentTheme.colors.header,
           padding: '0.5rem 1rem',
           minHeight: '40px',
           boxShadow: 'none',
@@ -150,16 +153,16 @@ export default function Header() {
           <motion.button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 rounded-lg"
-            style={{ color: '#F8F5EF' }}
+            style={{ color: currentTheme.colors.headerText }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             aria-label="Abrir menú"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               {isMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               )}
             </svg>
           </motion.button>
@@ -167,7 +170,7 @@ export default function Header() {
           {/* Logo/Título centrado */}
           <motion.span 
             className="text-sm font-medium" 
-            style={{ color: '#F8F5EF' }}
+            style={{ color: currentTheme.colors.headerText }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
@@ -176,20 +179,21 @@ export default function Header() {
             www.jcsellers.com
           </motion.span>
 
-          {/* Switch de idioma */}
+          {/* Controles: Tema e Idioma */}
           <motion.div
             className="flex items-center gap-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
+            <ThemeSelector />
             <motion.button
               onClick={() => setLanguage('es')}
               className="px-2 py-1 rounded text-xs font-medium transition-all"
               style={{
-                backgroundColor: language === 'es' ? '#D4AF37' : 'transparent',
-                color: language === 'es' ? '#000000' : '#F8F5EF',
-                border: language === 'es' ? 'none' : '1px solid #344A3D',
+                backgroundColor: language === 'es' ? currentTheme.colors.accent : 'transparent',
+                color: language === 'es' ? currentTheme.colors.headerText : currentTheme.colors.headerText,
+                border: language === 'es' ? 'none' : `1px solid ${currentTheme.colors.headerText}40`,
               }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -200,9 +204,9 @@ export default function Header() {
               onClick={() => setLanguage('en')}
               className="px-2 py-1 rounded text-xs font-medium transition-all"
               style={{
-                backgroundColor: language === 'en' ? '#D4AF37' : 'transparent',
-                color: language === 'en' ? '#000000' : '#F8F5EF',
-                border: language === 'en' ? 'none' : '1px solid #344A3D',
+                backgroundColor: language === 'en' ? currentTheme.colors.accent : 'transparent',
+                color: language === 'en' ? currentTheme.colors.headerText : currentTheme.colors.headerText,
+                border: language === 'en' ? 'none' : `1px solid ${currentTheme.colors.headerText}40`,
               }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -231,7 +235,7 @@ export default function Header() {
             <motion.div
               className="fixed top-0 left-0 bottom-0 z-50 w-64"
               style={{ 
-                backgroundColor: '#182B21',
+                backgroundColor: currentTheme.colors.background,
                 boxShadow: '4px 0 20px rgba(0, 0, 0, 0.5)',
               }}
               initial={{ x: -300 }}
@@ -244,26 +248,26 @@ export default function Header() {
                 <div 
                   className="p-4 border-b"
                   style={{ 
-                    borderColor: '#344A3D',
-                    backgroundColor: '#000000',
+                    borderColor: currentTheme.colors.border,
+                    backgroundColor: currentTheme.colors.header,
                   }}
                 >
                   <div className="flex items-center justify-between">
                     <h2 
                       className="text-lg font-bold"
-                      style={{ color: '#D4AF37' }}
+                      style={{ color: currentTheme.colors.headerText }}
                     >
                       {language === 'es' ? 'Menú' : 'Menu'}
                     </h2>
                     <motion.button
                       onClick={() => setIsMenuOpen(false)}
                       className="p-2 rounded-lg"
-                      style={{ color: '#F8F5EF' }}
-                      whileHover={{ scale: 1.1, backgroundColor: '#344A3D' }}
+                      style={{ color: currentTheme.colors.headerText }}
+                      whileHover={{ scale: 1.1, backgroundColor: currentTheme.colors.surface }}
                       whileTap={{ scale: 0.9 }}
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </motion.button>
                   </div>
@@ -274,13 +278,14 @@ export default function Header() {
                   {menuItems.map((item, index) => {
                     const isActive = pathname === item.href
                     const isSeparator = index === 6 // Separador después de "Perfil"
+                    const isPolicyLink = index >= 6 // Enlaces de políticas (después del separador)
                     
                     return (
                       <div key={item.href}>
                         {isSeparator && (
                           <div 
                             className="my-4"
-                            style={{ borderTop: '1px solid #344A3D' }}
+                            style={{ borderTop: `1px solid ${currentTheme.colors.border}` }}
                           />
                         )}
                         <motion.div
@@ -293,14 +298,14 @@ export default function Header() {
                             onClick={() => setIsMenuOpen(false)}
                             className="flex items-center gap-3 p-3 rounded-lg mb-2 transition-all"
                             style={{
-                              backgroundColor: isActive ? '#344A3D' : 'transparent',
-                              color: isActive ? '#D4AF37' : '#F8F5EF',
+                              backgroundColor: isActive ? currentTheme.colors.surface : 'transparent',
+                              color: isActive ? currentTheme.colors.accent : currentTheme.colors.text,
                             }}
                           >
-                            <div style={{ color: isActive ? '#D4AF37' : '#F8F5EF' }}>
+                            <div style={{ color: isActive ? currentTheme.colors.accent : currentTheme.colors.text }}>
                               {item.icon}
                             </div>
-                            <span className="font-medium">{item.label}</span>
+                            <span className={isPolicyLink ? "text-xs" : "font-medium"}>{item.label}</span>
                           </Link>
                         </motion.div>
                       </div>

@@ -7,27 +7,31 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { useCart } from '@/contexts/CartContext'
 import PerfumeImage from '@/components/PerfumeImage'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { useTheme, isDarkColor } from '@/contexts/ThemeContext'
 
 export default function CarritoPage() {
   const router = useRouter()
+  const { t } = useLanguage()
+  const { currentTheme } = useTheme()
   const { items, removeFromCart, updateQuantity, clearCart, totalPrice, minimumOrderAmount, meetsMinimumOrder } = useCart()
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
+    <div className="min-h-screen" style={{ backgroundColor: currentTheme.colors.background, color: currentTheme.colors.text }}>
       <Header />
       
       <main className="max-w-sm mx-auto pt-16 px-4 pb-32">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold" style={{ color: '#D4AF37' }}>
-            Carrito de Compras
+          <h1 className="text-2xl font-bold" style={{ color: currentTheme.colors.accent }}>
+            {t('cart.title')}
           </h1>
           <button
             onClick={() => router.back()}
             className="p-2 rounded-lg transition-all active:scale-95"
             style={{
-              backgroundColor: '#344A3D',
-              color: '#D4AF37',
+              backgroundColor: currentTheme.colors.surface,
+              color: currentTheme.colors.accent,
             }}
             aria-label="Volver"
           >
@@ -46,22 +50,22 @@ export default function CarritoPage() {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                style={{ color: '#6B5D4F' }}
+                style={{ color: currentTheme.colors.textSecondary }}
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              <p className="text-sm mb-6" style={{ color: '#6B5D4F' }}>
-                Tu carrito está vacío
+              <p className="text-sm mb-6" style={{ color: currentTheme.colors.textSecondary }}>
+                {t('cart.empty')}
               </p>
               <Link
                 href="/catalogo"
                 className="inline-block px-6 py-3 rounded-lg font-semibold text-center transition-all active:scale-95"
                 style={{
-                  backgroundColor: '#D4AF37',
-                  color: '#000000',
+                  backgroundColor: currentTheme.colors.accent,
+                  color: isDarkColor(currentTheme.colors.accent) ? '#F8F5EF' : '#1F1F1F',
                 }}
               >
-                Ir al Catálogo
+                {t('catalog.title')}
               </Link>
             </div>
           ) : (
@@ -71,7 +75,7 @@ export default function CarritoPage() {
                   key={item.id}
                   className="flex gap-3 p-3 rounded-lg"
                   style={{
-                    backgroundColor: '#344A3D',
+                    backgroundColor: currentTheme.colors.surface,
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                   }}
                   initial={{ opacity: 0, x: -20 }}
@@ -99,12 +103,12 @@ export default function CarritoPage() {
                       {item.name}
                     </h3>
                     {item.size && (
-                      <p className="text-xs mb-2" style={{ color: '#6B5D4F' }}>
+                      <p className="text-xs mb-2" style={{ color: currentTheme.colors.textSecondary }}>
                         {item.size}
                       </p>
                     )}
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-base font-bold" style={{ color: '#D4AF37' }}>
+                      <span className="text-base font-bold" style={{ color: currentTheme.colors.accent }}>
                         ${item.price.toFixed(2)}
                       </span>
                       
@@ -114,11 +118,11 @@ export default function CarritoPage() {
                           onClick={() => updateQuantity(item.id!, item.quantity - 1)}
                           className="w-8 h-8 rounded-lg flex items-center justify-center transition-all active:scale-95"
                           style={{
-                            backgroundColor: '#344A3D',
-                            color: '#D4AF37',
+                            backgroundColor: currentTheme.colors.surface,
+                            color: currentTheme.colors.accent,
                             border: '1px solid #D4AF37',
                           }}
-                          aria-label="Disminuir cantidad"
+                          aria-label={t('cart.decreaseQuantity')}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
@@ -131,11 +135,11 @@ export default function CarritoPage() {
                           onClick={() => updateQuantity(item.id!, item.quantity + 1)}
                           className="w-8 h-8 rounded-lg flex items-center justify-center transition-all active:scale-95"
                           style={{
-                            backgroundColor: '#344A3D',
-                            color: '#D4AF37',
+                            backgroundColor: currentTheme.colors.surface,
+                            color: currentTheme.colors.accent,
                             border: '1px solid #D4AF37',
                           }}
-                          aria-label="Aumentar cantidad"
+                          aria-label={t('cart.increaseQuantity')}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -147,7 +151,7 @@ export default function CarritoPage() {
                     {/* Subtotal */}
                     <div className="flex items-center justify-between">
                       <span className="text-xs" style={{ color: '#6B5D4F' }}>
-                        Subtotal: ${(item.price * item.quantity).toFixed(2)}
+                        {t('cart.subtotal')}: ${(item.price * item.quantity).toFixed(2)}
                       </span>
                       <button
                         onClick={() => removeFromCart(item.id!)}
@@ -155,9 +159,9 @@ export default function CarritoPage() {
                         style={{
                           color: '#6B5D4F',
                         }}
-                        aria-label="Eliminar producto"
+                        aria-label={t('cart.removeItem')}
                       >
-                        Eliminar
+                        {t('cart.remove')}
                       </button>
                     </div>
                   </div>
@@ -170,7 +174,7 @@ export default function CarritoPage() {
         {/* Footer con total y botón de checkout */}
         {items.length > 0 && (
           <div className="p-4 rounded-lg space-y-3" style={{ 
-                    backgroundColor: '#344A3D',
+                    backgroundColor: currentTheme.colors.surface,
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
           }}>
             {/* Mensaje de mínimo de compra */}
@@ -180,16 +184,16 @@ export default function CarritoPage() {
                 borderColor: 'rgba(212, 175, 55, 0.3)',
               }}>
                 <p className="text-sm text-center" style={{ color: '#D4AF37' }}>
-                  Pedido mínimo: ${minimumOrderAmount.toFixed(2)}
+                  {t('cart.minimumOrder')}: ${minimumOrderAmount.toFixed(2)}
                 </p>
                 <p className="text-xs text-center mt-1" style={{ color: '#D4AF37', opacity: 0.8 }}>
-                  Te faltan ${(minimumOrderAmount - totalPrice).toFixed(2)} para completar tu pedido
+                  {t('cart.remainingAmount')} ${(minimumOrderAmount - totalPrice).toFixed(2)} {t('cart.toComplete')}
                 </p>
               </div>
             )}
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold" style={{ color: '#F8F5EF' }}>
-                Total:
+                {t('cart.total')}:
               </span>
               <span className="text-2xl font-bold" style={{ color: '#D4AF37' }}>
                 ${totalPrice.toFixed(2)}
@@ -205,7 +209,7 @@ export default function CarritoPage() {
                   borderColor: '#D4AF37',
                 }}
               >
-                Seguir Comprando
+                {t('cart.continue')}
               </Link>
               <Link
                 href="/checkout"
@@ -215,7 +219,7 @@ export default function CarritoPage() {
                   color: meetsMinimumOrder ? '#000000' : '#FFFFFF',
                 }}
               >
-                Finalizar Compra
+                {t('cart.checkout')}
               </Link>
             </div>
           </div>

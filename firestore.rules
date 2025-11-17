@@ -161,6 +161,35 @@ service cloud.firestore {
       allow delete: if true;
     }
     
+    // Reglas para la colección de notificaciones
+    match /notifications/{notificationId} {
+      // Los usuarios pueden leer sus propias notificaciones o las globales (userId null)
+      allow read: if request.auth != null 
+        && (!resource.data.userId || resource.data.userId == request.auth.uid);
+      
+      // TEMPORAL: Permitir lectura sin autenticación para el admin
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow read: if true;
+      
+      // TEMPORAL: Permitir creación sin autenticación (para el admin)
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow create: if request.resource.data.keys().hasAll(['title', 'message', 'read'])
+        && request.resource.data.title is string
+        && request.resource.data.message is string
+        && request.resource.data.read is bool
+        && (!('userId' in request.resource.data) || request.resource.data.userId is string)
+        && (!('type' in request.resource.data) || request.resource.data.type is string);
+      
+      // Los usuarios pueden marcar sus propias notificaciones como leídas
+      allow update: if request.auth != null 
+        && (!resource.data.userId || resource.data.userId == request.auth.uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'updatedAt']);
+      
+      // TEMPORAL: Permitir actualización sin autenticación para el admin
+      // IMPORTANTE: Revertir esto en producción y usar solo con autenticación
+      allow update: if true;
+    }
+    
     // Denegar acceso a todo lo demás por defecto
     match /{document=**} {
       allow read, write: if false;

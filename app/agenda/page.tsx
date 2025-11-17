@@ -7,8 +7,14 @@ import Footer from '@/components/Footer'
 import { getAvailableSlotsByDate, getAvailableSlots } from '@/lib/firebase/availability'
 import { createAppointment } from '@/lib/firebase/appointments'
 import type { AvailableSlot } from '@/lib/firebase/availability'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { useTheme, getButtonTextColor, getIconColor } from '@/contexts/ThemeContext'
+import { onAuthChange } from '@/lib/firebase/auth'
+import type { User } from 'firebase/auth'
 
 export default function AgendaPage() {
+  const { t } = useLanguage()
+  const { currentTheme } = useTheme()
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [selectedTime, setSelectedTime] = useState<string>('')
   const [allSlots, setAllSlots] = useState<AvailableSlot[]>([])
@@ -24,6 +30,23 @@ export default function AgendaPage() {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [notes, setNotes] = useState('')
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = onAuthChange((authUser) => {
+      setUser(authUser)
+      // Si el usuario está logueado, prellenar email y nombre
+      if (authUser) {
+        if (authUser.email) {
+          setEmail(prev => prev || authUser.email || '')
+        }
+        if (authUser.displayName) {
+          setName(prev => prev || authUser.displayName || '')
+        }
+      }
+    })
+    return () => unsubscribe()
+  }, [])
 
   useEffect(() => {
     loadAvailableSlots()
@@ -69,7 +92,7 @@ export default function AgendaPage() {
       setSelectedTime('')
     } catch (error) {
       console.error('Error loading slots for date:', error)
-      setError('Error al cargar horarios disponibles')
+      setError(t('agenda.errorLoadingSlots'))
       setAvailableTimes([])
     } finally {
       setLoading(false)
@@ -82,7 +105,7 @@ export default function AgendaPage() {
     setSubmitting(true)
 
     if (!selectedDate || !selectedTime) {
-      setError('Por favor selecciona una fecha y hora')
+      setError(t('agenda.selectDateAndTime'))
       setSubmitting(false)
       return
     }
@@ -92,6 +115,7 @@ export default function AgendaPage() {
       const timeFormatted = `${selectedTime.padStart(2, '0')}:00`
       
       await createAppointment({
+        userId: user?.uid || 'guest', // Usar el ID del usuario autenticado si está logueado
         name,
         email,
         phone,
@@ -113,7 +137,7 @@ export default function AgendaPage() {
       await loadAvailableSlots()
     } catch (error: any) {
       console.error('Error creating appointment:', error)
-      setError(error.message || 'Error al agendar la cita. Por favor intenta de nuevo.')
+      setError(error.message || t('agenda.errorScheduling'))
     } finally {
       setSubmitting(false)
     }
@@ -190,15 +214,19 @@ export default function AgendaPage() {
   }
 
   const monthNames = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    t('agenda.months.january'), t('agenda.months.february'), t('agenda.months.march'), t('agenda.months.april'),
+    t('agenda.months.may'), t('agenda.months.june'), t('agenda.months.july'), t('agenda.months.august'),
+    t('agenda.months.september'), t('agenda.months.october'), t('agenda.months.november'), t('agenda.months.december')
   ]
 
-  const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+  const dayNames = [
+    t('agenda.days.sunday'), t('agenda.days.monday'), t('agenda.days.tuesday'), t('agenda.days.wednesday'),
+    t('agenda.days.thursday'), t('agenda.days.friday'), t('agenda.days.saturday')
+  ]
 
   if (success) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
+      <div className="min-h-screen" style={{ backgroundColor: currentTheme.colors.background, color: currentTheme.colors.text }}>
         <Header />
         <main className="max-w-sm mx-auto pt-16 px-4 pb-24">
           <motion.div
@@ -213,7 +241,7 @@ export default function AgendaPage() {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                style={{ color: '#D4AF37' }}
+                style={{ color: currentTheme.colors.accent }}
               >
                 <path
                   strokeLinecap="round"
@@ -223,20 +251,20 @@ export default function AgendaPage() {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold mb-4" style={{ color: '#D4AF37' }}>
-              ¡Cita Agendada!
+            <h2 className="text-2xl font-bold mb-4" style={{ color: currentTheme.colors.accent }}>
+              {t('agenda.appointmentScheduled')}
             </h2>
-            <p className="mb-8" style={{ color: '#F8F5EF' }}>
-              Tu cita ha sido agendada exitosamente. Te contactaremos pronto para confirmar.
+            <p className="mb-8" style={{ color: currentTheme.colors.text }}>
+              {t('agenda.appointmentSuccess')}
             </p>
             <motion.button
               onClick={() => setSuccess(false)}
               className="px-6 py-3 rounded-lg font-medium"
-              style={{ backgroundColor: '#D4AF37', color: '#000000' }}
+              style={{ backgroundColor: currentTheme.colors.accent, color: getButtonTextColor(currentTheme.colors.accent) }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Agendar Otra Cita
+              {t('agenda.scheduleAnother')}
             </motion.button>
           </motion.div>
         </main>
@@ -257,11 +285,11 @@ export default function AgendaPage() {
           transition={{ duration: 0.5 }}
           className="mb-6"
         >
-          <h1 className="text-2xl font-bold text-center mb-2" style={{ color: '#D4AF37' }}>
-            Agendar Cita
+          <h1 className="text-2xl font-bold text-center mb-2" style={{ color: currentTheme.colors.accent }}>
+            {t('agenda.title')}
           </h1>
-          <p className="text-sm text-center" style={{ color: '#999' }}>
-            Selecciona una fecha y hora disponible
+          <p className="text-sm text-center" style={{ color: currentTheme.colors.textSecondary }}>
+            {t('agenda.subtitle')}
           </p>
         </motion.section>
 
@@ -275,7 +303,7 @@ export default function AgendaPage() {
           <div
             className="rounded-lg p-4"
             style={{
-              backgroundColor: '#344A3D',
+              backgroundColor: currentTheme.colors.surface,
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
             }}
           >
@@ -284,7 +312,7 @@ export default function AgendaPage() {
               <motion.button
                 onClick={goToPreviousMonth}
                 className="p-2 rounded-lg"
-                style={{ backgroundColor: '#182B21', color: '#D4AF37' }}
+                style={{ backgroundColor: currentTheme.colors.background, color: getIconColor(currentTheme.colors.background, currentTheme.colors.accent) }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -292,13 +320,13 @@ export default function AgendaPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </motion.button>
-              <h2 className="text-lg font-semibold" style={{ color: '#D4AF37' }}>
+              <h2 className="text-lg font-semibold" style={{ color: currentTheme.colors.accent }}>
                 {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
               </h2>
               <motion.button
                 onClick={goToNextMonth}
                 className="p-2 rounded-lg"
-                style={{ backgroundColor: '#182B21', color: '#D4AF37' }}
+                style={{ backgroundColor: currentTheme.colors.background, color: getIconColor(currentTheme.colors.background, currentTheme.colors.accent) }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -314,7 +342,7 @@ export default function AgendaPage() {
                 <div
                   key={day}
                   className="text-center text-xs font-medium py-2"
-                  style={{ color: '#999' }}
+                  style={{ color: currentTheme.colors.textSecondary }}
                 >
                   {day}
                 </div>
@@ -343,20 +371,20 @@ export default function AgendaPage() {
                     style={
                       selected
                         ? {
-                            backgroundColor: '#D4AF37',
-                            color: '#000000',
-                            boxShadow: '0 2px 8px rgba(212, 175, 55, 0.4)'
+                            backgroundColor: currentTheme.colors.accent,
+                            color: getButtonTextColor(currentTheme.colors.accent),
+                            boxShadow: `0 2px 8px ${currentTheme.colors.accent}40`
                           }
                         : available && !past
                         ? {
-                            backgroundColor: '#182B21',
-                            color: '#D4AF37',
-                            border: '1px solid rgba(212, 175, 55, 0.3)'
+                            backgroundColor: currentTheme.colors.background,
+                            color: getIconColor(currentTheme.colors.background, currentTheme.colors.accent),
+                            border: `1px solid ${currentTheme.colors.accent}30`
                           }
                         : {
-                            backgroundColor: '#182B21',
-                            color: '#666',
-                            border: '1px solid rgba(255, 255, 255, 0.1)'
+                            backgroundColor: currentTheme.colors.background,
+                            color: currentTheme.colors.textSecondary,
+                            border: `1px solid ${currentTheme.colors.border}30`
                           }
                     }
                     whileHover={available && !past ? { scale: 1.1 } : {}}
@@ -378,20 +406,20 @@ export default function AgendaPage() {
             transition={{ duration: 0.3 }}
             className="mb-6"
           >
-            <h3 className="text-lg font-semibold mb-3" style={{ color: '#D4AF37' }}>
-              Horarios Disponibles
+            <h3 className="text-lg font-semibold mb-3" style={{ color: currentTheme.colors.accent }}>
+              {t('agenda.availableTimes')}
             </h3>
             {loading ? (
               <div className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#D4AF37' }}></div>
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: currentTheme.colors.accent }}></div>
               </div>
             ) : availableTimes.length === 0 ? (
               <div
                 className="rounded-lg p-4 text-center"
-                style={{ backgroundColor: '#344A3D' }}
+                style={{ backgroundColor: currentTheme.colors.surface }}
               >
-                <p className="text-sm" style={{ color: '#999' }}>
-                  No hay horarios disponibles para esta fecha
+                <p className="text-sm" style={{ color: currentTheme.colors.textSecondary }}>
+                  {t('agenda.noTimesAvailable')}
                 </p>
               </div>
             ) : (
@@ -405,14 +433,14 @@ export default function AgendaPage() {
                     style={
                       selectedTime === time
                         ? {
-                            backgroundColor: '#D4AF37',
-                            color: '#000000',
-                            boxShadow: '0 2px 8px rgba(212, 175, 55, 0.4)'
+                            backgroundColor: currentTheme.colors.accent,
+                            color: getButtonTextColor(currentTheme.colors.accent),
+                            boxShadow: `0 2px 8px ${currentTheme.colors.accent}40`
                           }
                         : {
-                            backgroundColor: '#344A3D',
-                            color: '#D4AF37',
-                            border: '1px solid rgba(212, 175, 55, 0.3)'
+                            backgroundColor: currentTheme.colors.surface,
+                            color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
+                            border: `1px solid ${currentTheme.colors.accent}30`
                           }
                     }
                     whileHover={{ scale: 1.05 }}
@@ -435,13 +463,13 @@ export default function AgendaPage() {
             onSubmit={handleSubmit}
             className="space-y-4"
           >
-            <h3 className="text-lg font-semibold" style={{ color: '#D4AF37' }}>
-              Información de Contacto
+            <h3 className="text-lg font-semibold" style={{ color: currentTheme.colors.accent }}>
+              {t('agenda.contactInfo')}
             </h3>
 
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#D4AF37' }}>
-                Nombre Completo
+              <label className="block text-sm font-medium mb-2" style={{ color: currentTheme.colors.accent }}>
+                {t('agenda.fullName')}
               </label>
               <input
                 type="text"
@@ -450,17 +478,17 @@ export default function AgendaPage() {
                 required
                 className="w-full px-4 py-3 rounded-lg text-sm"
                 style={{ 
-                  backgroundColor: '#344A3D', 
-                  color: '#F8F5EF',
-                  border: '1px solid rgba(212, 175, 55, 0.3)'
+                  backgroundColor: currentTheme.colors.surface, 
+                  color: currentTheme.colors.text,
+                  border: `1px solid ${currentTheme.colors.accent}30`
                 }}
                 placeholder="Juan Pérez"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#D4AF37' }}>
-                Email
+              <label className="block text-sm font-medium mb-2" style={{ color: currentTheme.colors.accent }}>
+                {t('agenda.email')}
               </label>
               <input
                 type="email"
@@ -469,17 +497,17 @@ export default function AgendaPage() {
                 required
                 className="w-full px-4 py-3 rounded-lg text-sm"
                 style={{ 
-                  backgroundColor: '#344A3D', 
-                  color: '#F8F5EF',
-                  border: '1px solid rgba(212, 175, 55, 0.3)'
+                  backgroundColor: currentTheme.colors.surface, 
+                  color: currentTheme.colors.text,
+                  border: `1px solid ${currentTheme.colors.accent}30`
                 }}
                 placeholder="juan@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#D4AF37' }}>
-                Teléfono
+              <label className="block text-sm font-medium mb-2" style={{ color: currentTheme.colors.accent }}>
+                {t('agenda.phone')}
               </label>
               <input
                 type="tel"
@@ -488,17 +516,17 @@ export default function AgendaPage() {
                 required
                 className="w-full px-4 py-3 rounded-lg text-sm"
                 style={{ 
-                  backgroundColor: '#344A3D', 
-                  color: '#F8F5EF',
-                  border: '1px solid rgba(212, 175, 55, 0.3)'
+                  backgroundColor: currentTheme.colors.surface, 
+                  color: currentTheme.colors.text,
+                  border: `1px solid ${currentTheme.colors.accent}30`
                 }}
                 placeholder="+1 234 567 8900"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: '#D4AF37' }}>
-                Notas (Opcional)
+              <label className="block text-sm font-medium mb-2" style={{ color: currentTheme.colors.accent }}>
+                {t('agenda.notes')}
               </label>
               <textarea
                 value={notes}
@@ -506,12 +534,12 @@ export default function AgendaPage() {
                 rows={3}
                 className="w-full px-4 py-3 rounded-lg text-sm"
                 style={{ 
-                  backgroundColor: '#344A3D', 
-                  color: '#F8F5EF',
-                  border: '1px solid rgba(212, 175, 55, 0.3)',
+                  backgroundColor: currentTheme.colors.surface, 
+                  color: currentTheme.colors.text,
+                  border: `1px solid ${currentTheme.colors.accent}30`,
                   resize: 'vertical'
                 }}
-                placeholder="Información adicional sobre tu cita..."
+                placeholder={t('agenda.notesPlaceholder')}
               />
             </div>
 
@@ -526,14 +554,14 @@ export default function AgendaPage() {
               disabled={submitting}
               className="w-full py-3 rounded-lg font-medium transition-all"
               style={{ 
-                backgroundColor: submitting ? '#666' : '#D4AF37',
-                color: '#000000',
+                backgroundColor: submitting ? currentTheme.colors.textSecondary : currentTheme.colors.accent,
+                color: submitting ? currentTheme.colors.text : getButtonTextColor(currentTheme.colors.accent),
                 opacity: submitting ? 0.6 : 1
               }}
               whileHover={{ scale: submitting ? 1 : 1.02 }}
               whileTap={{ scale: submitting ? 1 : 0.98 }}
             >
-              {submitting ? 'Agendando...' : 'Confirmar Cita'}
+              {submitting ? t('agenda.scheduling') : t('agenda.confirmAppointment')}
             </motion.button>
           </motion.form>
         )}

@@ -9,7 +9,7 @@ export interface CartItem extends Perfume {
 
 interface CartContextType {
   items: CartItem[]
-  addToCart: (perfume: Perfume) => { success: boolean; message?: string }
+  addToCart: (perfume: Perfume, quantity?: number) => { success: boolean; message?: string }
   removeFromCart: (perfumeId: string) => void
   updateQuantity: (perfumeId: string, quantity: number) => void
   clearCart: () => void
@@ -58,7 +58,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, mounted])
 
-  const addToCart = (perfume: Perfume): { success: boolean; message?: string } => {
+  const addToCart = (perfume: Perfume, quantity: number = 1): { success: boolean; message?: string } => {
     setItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.id === perfume.id)
       
@@ -66,12 +66,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         // Si ya existe, aumentar cantidad
         return prevItems.map((item) =>
           item.id === perfume.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         )
       } else {
-        // Si no existe, agregar nuevo item
-        return [...prevItems, { ...perfume, quantity: 1 }]
+        // Si no existe, agregar nuevo item con la cantidad especificada
+        return [...prevItems, { ...perfume, quantity }]
       }
     })
     setIsOpen(true) // Abrir carrito al agregar

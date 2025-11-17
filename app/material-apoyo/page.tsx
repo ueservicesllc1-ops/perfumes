@@ -8,9 +8,11 @@ import { getAllMaterials } from '@/lib/firebase/materials'
 import type { Material } from '@/lib/firebase/materials'
 import { getImageUrl, getVideoUrl } from '@/lib/b2/storage'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useTheme, getButtonTextColor } from '@/contexts/ThemeContext'
 
 export default function MaterialApoyo() {
   const { t } = useLanguage()
+  const { currentTheme } = useTheme()
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -101,13 +103,13 @@ export default function MaterialApoyo() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
         className="rounded-lg overflow-hidden"
-        style={{ backgroundColor: '#344A3D' }}
+        style={{ backgroundColor: currentTheme.colors.surface }}
         whileHover={{ scale: 1.02, y: -2 }}
       >
         {thumbnailUrl && (
           <div 
             className="aspect-video overflow-hidden cursor-pointer" 
-            style={{ backgroundColor: '#000000' }}
+            style={{ backgroundColor: currentTheme.colors.header }}
             onClick={() => material.fileType === 'image' && handleImageClick(material)}
           >
             {material.fileType === 'image' ? (
@@ -126,7 +128,7 @@ export default function MaterialApoyo() {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <svg
                     className="w-8 h-8"
-                    style={{ color: '#D4AF37' }}
+                    style={{ color: currentTheme.colors.accent }}
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -138,7 +140,7 @@ export default function MaterialApoyo() {
               <div className="w-full h-full flex items-center justify-center">
                 <svg
                   className="w-8 h-8"
-                  style={{ color: '#D4AF37' }}
+                  style={{ color: currentTheme.colors.accent }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -153,7 +155,7 @@ export default function MaterialApoyo() {
         <div className="p-2">
           <h3 
             className="text-xs font-semibold mb-1 line-clamp-2"
-            style={{ color: '#D4AF37' }}
+            style={{ color: currentTheme.colors.accent }}
           >
             {material.title}
           </h3>
@@ -161,14 +163,14 @@ export default function MaterialApoyo() {
           {material.description && (
             <p 
               className="text-xs mb-2 line-clamp-2"
-              style={{ color: '#F8F5EF', opacity: 0.8 }}
+              style={{ color: currentTheme.colors.text, opacity: 0.8 }}
             >
               {material.description}
             </p>
           )}
           
           <div className="flex flex-col gap-1">
-            <div className="text-xs" style={{ color: '#F8F5EF', opacity: 0.6 }}>
+            <div className="text-xs" style={{ color: currentTheme.colors.text, opacity: 0.6 }}>
               <span className="capitalize text-[10px]">{material.fileType}</span>
               {material.fileSize && (
                 <span className="ml-1 text-[10px]">• {formatFileSize(material.fileSize)}</span>
@@ -179,8 +181,8 @@ export default function MaterialApoyo() {
               onClick={() => handleDownload(material)}
               className="px-2 py-1 rounded text-xs font-medium w-full"
               style={{ 
-                backgroundColor: '#D4AF37',
-                color: '#000000',
+                backgroundColor: currentTheme.colors.accent,
+                color: getButtonTextColor(currentTheme.colors.accent),
               }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -194,7 +196,7 @@ export default function MaterialApoyo() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#182B21', paddingTop: '60px', paddingBottom: '80px' }}>
+    <div className="min-h-screen" style={{ backgroundColor: currentTheme.colors.background, paddingTop: '60px', paddingBottom: '80px' }}>
       <Header />
       
       <main className="max-w-4xl mx-auto px-4 py-8">
@@ -205,26 +207,26 @@ export default function MaterialApoyo() {
         >
           <h1 
             className="text-2xl font-bold mb-6 text-center"
-            style={{ color: '#D4AF37' }}
+            style={{ color: currentTheme.colors.accent }}
           >
             {t('nav.material')}
           </h1>
 
           {loading && (
             <div className="text-center py-12">
-              <p style={{ color: '#F8F5EF' }}>{t('material.loading')}</p>
+              <p style={{ color: currentTheme.colors.text }}>{t('material.loading')}</p>
             </div>
           )}
 
           {error && (
-            <div className="p-4 rounded-lg mb-6" style={{ backgroundColor: '#344A3D' }}>
-              <p style={{ color: '#D4AF37' }}>⚠️ {error}</p>
+            <div className="p-4 rounded-lg mb-6" style={{ backgroundColor: currentTheme.colors.surface }}>
+              <p style={{ color: currentTheme.colors.accent }}>⚠️ {error}</p>
             </div>
           )}
 
           {!loading && !error && materials.length === 0 && (
             <div className="text-center py-12">
-              <p style={{ color: '#F8F5EF' }}>{t('material.noAvailable')}</p>
+              <p style={{ color: currentTheme.colors.text }}>{t('material.noAvailable')}</p>
             </div>
           )}
 

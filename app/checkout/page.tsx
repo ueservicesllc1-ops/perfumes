@@ -10,12 +10,24 @@ import { createOrder } from '@/lib/firebase/orders'
 import PerfumeImage from '@/components/PerfumeImage'
 import { generateOrderPDF, createWhatsAppMessage, openWhatsApp } from '@/lib/utils/pdfGenerator'
 import { whatsappConfig } from '@/lib/config/whatsapp'
+import { onAuthChange } from '@/lib/firebase/auth'
+import { useTheme, isDarkColor } from '@/contexts/ThemeContext'
+import type { User } from 'firebase/auth'
 
 export default function Checkout() {
   const router = useRouter()
+  const { currentTheme } = useTheme()
   const { items, totalPrice, clearCart, minimumOrderAmount, meetsMinimumOrder } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = onAuthChange((user) => {
+      setUser(user)
+    })
+    return () => unsubscribe()
+  }, [])
 
   const [shippingInfo, setShippingInfo] = useState({
     fullName: '',
@@ -99,7 +111,7 @@ export default function Checkout() {
 
       // Crear la orden
       const orderId = await createOrder({
-        userId: 'guest', // En producción, usar el ID del usuario autenticado
+        userId: user?.uid || 'guest', // Usar el ID del usuario autenticado si está logueado
         items: orderItems,
         total: totalPrice,
         status: 'pending',
@@ -171,7 +183,7 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: '#182B21', color: '#F8F5EF' }}>
+      <div className="min-h-screen" style={{ backgroundColor: currentTheme.colors.background, color: currentTheme.colors.text }}>
         <Header />
         <main className="max-w-sm mx-auto pt-16 px-4 pb-24">
           <div className="text-center py-12">
@@ -180,22 +192,22 @@ export default function Checkout() {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-                style={{ color: '#6B5D4F' }}
+                style={{ color: currentTheme.colors.textSecondary }}
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            <h2 className="text-xl font-bold mb-2" style={{ color: '#F8F5EF' }}>
+            <h2 className="text-xl font-bold mb-2" style={{ color: currentTheme.colors.text }}>
               Carrito Vacío
             </h2>
-            <p className="text-sm mb-6" style={{ color: '#6B5D4F' }}>
+            <p className="text-sm mb-6" style={{ color: currentTheme.colors.textSecondary }}>
               No hay productos en tu carrito
             </p>
             <button
               onClick={() => router.push('/catalogo')}
               className="px-6 py-3 rounded-lg font-semibold transition-all active:scale-95"
               style={{
-                backgroundColor: '#D4AF37',
-                color: '#000000',
+                backgroundColor: currentTheme.colors.accent,
+                color: isDarkColor(currentTheme.colors.accent) ? '#F8F5EF' : '#1F1F1F',
               }}
             >
               Ir al Catálogo
@@ -224,7 +236,7 @@ export default function Checkout() {
 
         {/* Resumen de la Orden */}
         <section className="mb-6 p-4 rounded-lg" style={{
-          backgroundColor: '#344A3D',
+          backgroundColor: currentTheme.colors.surface,
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
         }}>
           <h2 className="text-lg font-bold mb-4" style={{ color: '#D4AF37' }}>
@@ -252,7 +264,7 @@ export default function Checkout() {
                     {item.name}
                   </h3>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs" style={{ color: '#6B5D4F' }}>
+                    <span className="text-xs" style={{ color: currentTheme.colors.textSecondary }}>
                       Cantidad: {item.quantity}
                     </span>
                     <span className="text-sm font-bold" style={{ color: '#D4AF37' }}>
@@ -309,7 +321,7 @@ export default function Checkout() {
                   required
                   className="w-full px-4 py-2.5 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: '#344A3D',
+                    backgroundColor: currentTheme.colors.surface,
                     borderColor: '#D4AF37',
                     color: '#F8F5EF',
                   }}
@@ -328,7 +340,7 @@ export default function Checkout() {
                   required
                   className="w-full px-4 py-2.5 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: '#344A3D',
+                    backgroundColor: currentTheme.colors.surface,
                     borderColor: '#D4AF37',
                     color: '#F8F5EF',
                   }}
@@ -347,7 +359,7 @@ export default function Checkout() {
                   required
                   className="w-full px-4 py-2.5 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: '#344A3D',
+                    backgroundColor: currentTheme.colors.surface,
                     borderColor: '#D4AF37',
                     color: '#F8F5EF',
                   }}
@@ -366,7 +378,7 @@ export default function Checkout() {
                   required
                   className="w-full px-4 py-2.5 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: '#344A3D',
+                    backgroundColor: currentTheme.colors.surface,
                     borderColor: '#D4AF37',
                     color: '#F8F5EF',
                   }}
@@ -386,7 +398,7 @@ export default function Checkout() {
                     required
                     className="w-full px-4 py-2.5 rounded-lg border transition-all"
                     style={{
-                      backgroundColor: '#344A3D',
+                      backgroundColor: currentTheme.colors.surface,
                       borderColor: '#D4AF37',
                       color: '#F8F5EF',
                     }}
@@ -405,7 +417,7 @@ export default function Checkout() {
                     required
                     className="w-full px-4 py-2.5 rounded-lg border transition-all"
                     style={{
-                      backgroundColor: '#344A3D',
+                      backgroundColor: currentTheme.colors.surface,
                       borderColor: '#D4AF37',
                       color: '#F8F5EF',
                     }}
@@ -426,7 +438,7 @@ export default function Checkout() {
                     required
                     className="w-full px-4 py-2.5 rounded-lg border transition-all"
                     style={{
-                      backgroundColor: '#344A3D',
+                      backgroundColor: currentTheme.colors.surface,
                       borderColor: '#D4AF37',
                       color: '#F8F5EF',
                     }}
@@ -444,7 +456,7 @@ export default function Checkout() {
                     required
                     className="w-full px-4 py-2.5 rounded-lg border transition-all"
                     style={{
-                      backgroundColor: '#344A3D',
+                      backgroundColor: currentTheme.colors.surface,
                       borderColor: '#D4AF37',
                       color: '#F8F5EF',
                     }}
