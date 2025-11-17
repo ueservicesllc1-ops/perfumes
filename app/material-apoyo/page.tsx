@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { getAllMaterials } from '@/lib/firebase/materials'
@@ -315,8 +315,9 @@ export default function MaterialApoyo() {
       <Footer />
 
       {/* Modal para imagen grande */}
-      {selectedImage && (
-        <motion.div
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.95)' }}
           initial={{ opacity: 0 }}
@@ -360,7 +361,8 @@ export default function MaterialApoyo() {
             />
           </motion.div>
         </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   )
 }
