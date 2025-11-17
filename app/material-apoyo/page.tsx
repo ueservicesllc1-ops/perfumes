@@ -12,6 +12,7 @@ export default function MaterialApoyo() {
   const [materials, setMaterials] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   useEffect(() => {
     loadMaterials()
@@ -28,6 +29,15 @@ export default function MaterialApoyo() {
       setError(err.message || 'Error al cargar el material de apoyo')
     } finally {
       setLoading(false)
+    }
+  }
+
+  function handleImageClick(material: Material) {
+    if (material.fileType === 'image') {
+      const imageUrl = material.fileUrl.startsWith('/api/b2')
+        ? material.fileUrl
+        : getImageUrl(material.fileUrl)
+      setSelectedImage(imageUrl)
     }
   }
 
@@ -93,7 +103,11 @@ export default function MaterialApoyo() {
         whileHover={{ scale: 1.02, y: -2 }}
       >
         {thumbnailUrl && (
-          <div className="aspect-video overflow-hidden" style={{ backgroundColor: '#000000' }}>
+          <div 
+            className="aspect-video overflow-hidden cursor-pointer" 
+            style={{ backgroundColor: '#000000' }}
+            onClick={() => material.fileType === 'image' && handleImageClick(material)}
+          >
             {material.fileType === 'image' ? (
               <img
                 src={thumbnailUrl}
@@ -299,6 +313,54 @@ export default function MaterialApoyo() {
       </main>
 
       <Footer />
+
+      {/* Modal para imagen grande */}
+      {selectedImage && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.95)' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setSelectedImage(null)}
+        >
+          <motion.div
+            className="relative max-w-4xl max-h-[90vh] w-full"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Botón cerrar */}
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-10 right-0 z-10 p-2 rounded-full"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', color: '#FFFFFF' }}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* Imagen */}
+            <img
+              src={selectedImage}
+              alt="Imagen ampliada"
+              className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+            />
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   )
 }
