@@ -32,3 +32,4 @@ service cloud.firestore {
 
 Usa el archivo `firestore.rules` que incluye validaciones de datos y reglas más específicas.
 
+

@@ -175,3 +175,4 @@ Puedes probar las reglas en Firebase Console:
 - [Firebase Console](https://console.firebase.google.com/)
 - [Simulador de Reglas](https://firebase.google.com/docs/firestore/security/test-rules-emulator)
 
+

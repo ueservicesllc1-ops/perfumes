@@ -1,6 +1,5 @@
 'use client'
 
-import { useTheme } from '@/contexts/ThemeContext'
 import { ReactNode } from 'react'
 
 interface ThemedComponentProps {
@@ -20,8 +19,6 @@ export default function ThemedComponent({
   as: Component = 'div',
   ...props 
 }: ThemedComponentProps) {
-  const { currentPalette } = useTheme()
-  
   // Las clases se aplican usando variables CSS, no necesitamos cambiar clases aquí
   return (
     <Component className={className} {...props}>
@@ -29,4 +26,5 @@ export default function ThemedComponent({
     </Component>
   )
 }
+
 

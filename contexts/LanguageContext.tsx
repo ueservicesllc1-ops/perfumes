@@ -194,9 +194,9 @@ const translations: Record<Language, Record<string, string>> = {
     'notifications.loading': 'Cargando notificaciones...',
     'notifications.noNotifications': 'No tienes notificaciones',
     'notifications.justNow': 'Ahora mismo',
-    'notifications.minutesAgo': (count: number) => `Hace ${count} minuto${count !== 1 ? 's' : ''}`,
-    'notifications.hoursAgo': (count: number) => `Hace ${count} hora${count !== 1 ? 's' : ''}`,
-    'notifications.daysAgo': (count: number) => `Hace ${count} día${count !== 1 ? 's' : ''}`,
+    'notifications.minutesAgo': 'Hace {count} minuto(s)',
+    'notifications.hoursAgo': 'Hace {count} hora(s)',
+    'notifications.daysAgo': 'Hace {count} día(s)',
     'notifications.markAllRead': 'Marcar todas como leídas',
     
     // Otros

@@ -97,3 +97,4 @@ arabikey/
 - Las subidas se hacen a través del proxy (más seguro)
 - Las imágenes se sirven a través del proxy para evitar problemas de CORS
 
+
