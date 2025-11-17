@@ -81,6 +81,51 @@ export default function Header() {
         </svg>
       ),
     },
+    {
+      href: '/politica-privacidad',
+      label: 'Política de Privacidad',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      ),
+    },
+    {
+      href: '/terminos-condiciones',
+      label: 'Términos y Condiciones',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+    },
+    {
+      href: '/informacion-envio',
+      label: 'Información de Envío',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+        </svg>
+      ),
+    },
+    {
+      href: '/poliza-devolucion',
+      label: 'Póliza de Devolución',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+        </svg>
+      ),
+    },
+    {
+      href: '/nosotros',
+      label: 'Nosotros',
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      ),
+    },
   ]
 
   return (
@@ -194,28 +239,37 @@ export default function Header() {
                 <nav className="flex-1 overflow-y-auto p-4">
                   {menuItems.map((item, index) => {
                     const isActive = pathname === item.href
+                    const isSeparator = index === 6 // Separador después de "Perfil"
+                    
                     return (
-                      <motion.div
-                        key={item.href}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                      >
-                        <Link
-                          href={item.href}
-                          onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-lg mb-2 transition-all"
-                          style={{
-                            backgroundColor: isActive ? '#344A3D' : 'transparent',
-                            color: isActive ? '#D4AF37' : '#F8F5EF',
-                          }}
+                      <div key={item.href}>
+                        {isSeparator && (
+                          <div 
+                            className="my-4"
+                            style={{ borderTop: '1px solid #344A3D' }}
+                          />
+                        )}
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
                         >
-                          <div style={{ color: isActive ? '#D4AF37' : '#F8F5EF' }}>
-                            {item.icon}
-                          </div>
-                          <span className="font-medium">{item.label}</span>
-                        </Link>
-                      </motion.div>
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center gap-3 p-3 rounded-lg mb-2 transition-all"
+                            style={{
+                              backgroundColor: isActive ? '#344A3D' : 'transparent',
+                              color: isActive ? '#D4AF37' : '#F8F5EF',
+                            }}
+                          >
+                            <div style={{ color: isActive ? '#D4AF37' : '#F8F5EF' }}>
+                              {item.icon}
+                            </div>
+                            <span className="font-medium">{item.label}</span>
+                          </Link>
+                        </motion.div>
+                      </div>
                     )
                   })}
                 </nav>
