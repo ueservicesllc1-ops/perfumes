@@ -16,16 +16,16 @@ export async function generateOrderPDF(orderData: {
   const pageHeight = doc.internal.pageSize.getHeight()
   
   // Colores de la marca
-  const goldColor = [212, 175, 55] // #D4AF37
-  const darkGreenColor = [24, 43, 33] // #182B21
-  const cardColor = [52, 74, 61] // #344A3D
-  const lightTextColor = [248, 245, 239] // #F8F5EF
-  const grayColor = [107, 93, 79] // #6B5D4F
+  const goldColor = { r: 212, g: 175, b: 55 } // #D4AF37
+  const darkGreenColor = { r: 24, g: 43, b: 33 } // #182B21
+  const cardColor = { r: 52, g: 74, b: 61 } // #344A3D
+  const lightTextColor = { r: 248, g: 245, b: 239 } // #F8F5EF
+  const grayColor = { r: 107, g: 93, b: 79 } // #6B5D4F
   
   let yPos = 0
 
   // ========== ENCABEZADO CON FONDO DORADO ==========
-  doc.setFillColor(...goldColor)
+  doc.setFillColor(goldColor.r, goldColor.g, goldColor.b)
   doc.rect(0, 0, pageWidth, 50, 'F')
   
   // Logo/Título principal
@@ -45,15 +45,15 @@ export async function generateOrderPDF(orderData: {
   yPos = 60
 
   // ========== INFORMACIÓN DE ORDEN ==========
-  doc.setFillColor(...cardColor)
+  doc.setFillColor(cardColor.r, cardColor.g, cardColor.b)
   doc.roundedRect(15, yPos, pageWidth - 30, 35, 3, 3, 'F')
   
-  doc.setTextColor(...lightTextColor)
+  doc.setTextColor(lightTextColor.r, lightTextColor.g, lightTextColor.b)
   doc.setFontSize(11)
   doc.setFont('helvetica', 'bold')
   doc.text('NÚMERO DE ORDEN', 20, yPos + 10)
   doc.setFont('helvetica', 'normal')
-  doc.setTextColor(...goldColor)
+  doc.setTextColor(goldColor.r, goldColor.g, goldColor.b)
   doc.setFontSize(14)
   doc.text(orderData.orderId, 20, yPos + 20)
   
@@ -69,16 +69,16 @@ export async function generateOrderPDF(orderData: {
   })
   
   doc.setFontSize(9)
-  doc.setTextColor(...lightTextColor)
+  doc.setTextColor(lightTextColor.r, lightTextColor.g, lightTextColor.b)
   doc.text(`Fecha: ${dateStr}`, pageWidth - 20, yPos + 10, { align: 'right' })
   doc.text(`Hora: ${timeStr}`, pageWidth - 20, yPos + 18, { align: 'right' })
   
   yPos += 45
 
   // ========== INFORMACIÓN DE ENVÍO ==========
-  doc.setFillColor(...darkGreenColor)
+  doc.setFillColor(darkGreenColor.r, darkGreenColor.g, darkGreenColor.b)
   doc.roundedRect(15, yPos, pageWidth - 30, 5, 3, 3, 'F')
-  doc.setTextColor(...goldColor)
+  doc.setTextColor(goldColor.r, goldColor.g, goldColor.b)
   doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
   doc.text('📦 INFORMACIÓN DE ENVÍO', 20, yPos + 3.5)
@@ -148,9 +148,9 @@ export async function generateOrderPDF(orderData: {
   yPos += 85
 
   // ========== PRODUCTOS ==========
-  doc.setFillColor(...darkGreenColor)
+  doc.setFillColor(darkGreenColor.r, darkGreenColor.g, darkGreenColor.b)
   doc.roundedRect(15, yPos, pageWidth - 30, 5, 3, 3, 'F')
-  doc.setTextColor(...goldColor)
+  doc.setTextColor(goldColor.r, goldColor.g, goldColor.b)
   doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
   doc.text('🛍️ PRODUCTOS', 20, yPos + 3.5)
@@ -167,12 +167,12 @@ export async function generateOrderPDF(orderData: {
     doc.roundedRect(15, yPos, pageWidth - 30, 35, 3, 3, 'F')
     
     // Borde dorado
-    doc.setDrawColor(...goldColor)
+    doc.setDrawColor(goldColor.r, goldColor.g, goldColor.b)
     doc.setLineWidth(0.5)
     doc.roundedRect(15, yPos, pageWidth - 30, 35, 3, 3, 'D')
     
     // Número y nombre del producto
-    doc.setTextColor(...darkGreenColor)
+    doc.setTextColor(darkGreenColor.r, darkGreenColor.g, darkGreenColor.b)
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
     doc.text(`${index + 1}. ${item.name}`, 20, yPos + 8)
@@ -196,7 +196,7 @@ export async function generateOrderPDF(orderData: {
     // Subtotal a la derecha
     const subtotal = item.price * item.quantity
     doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...goldColor)
+    doc.setTextColor(goldColor.r, goldColor.g, goldColor.b)
     doc.setFontSize(11)
     doc.text(`$${subtotal.toFixed(2)}`, pageWidth - 20, yPos + 20, { align: 'right' })
     
@@ -207,7 +207,7 @@ export async function generateOrderPDF(orderData: {
   yPos += 5
   
   // Fondo dorado para el total
-  doc.setFillColor(...goldColor)
+  doc.setFillColor(goldColor.r, goldColor.g, goldColor.b)
   doc.roundedRect(15, yPos, pageWidth - 30, 20, 3, 3, 'F')
   
   doc.setTextColor(0, 0, 0)
