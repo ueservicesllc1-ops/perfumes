@@ -40,6 +40,11 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
+  // Excluir rutas de admin y API del Service Worker
+  if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/')) {
+    return fetch(event.request)
+  }
+
   // Solo procesar requests GET para cache
   if (event.request.method !== 'GET') {
     // Para requests POST, PUT, DELETE, etc., solo hacer fetch sin cachear
