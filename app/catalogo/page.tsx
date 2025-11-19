@@ -20,6 +20,8 @@ export default function Catalogo() {
   const [selectedCollection, setSelectedCollection] = useState<string>('Todas')
   const [showCategoryMenu, setShowCategoryMenu] = useState(false)
   const [showBrandMenu, setShowBrandMenu] = useState(false)
+  const [showCollectionMenu, setShowCollectionMenu] = useState(false)
+  const collectionMenuRef = useRef<HTMLDivElement>(null)
   const { perfumes, loading, error } = usePerfumes(selectedCategory)
   const { addToCart } = useCart()
   const categoryMenuRef = useRef<HTMLDivElement>(null)
@@ -34,16 +36,19 @@ export default function Catalogo() {
       if (brandMenuRef.current && !brandMenuRef.current.contains(event.target as Node)) {
         setShowBrandMenu(false)
       }
+      if (collectionMenuRef.current && !collectionMenuRef.current.contains(event.target as Node)) {
+        setShowCollectionMenu(false)
+      }
     }
 
-    if (showCategoryMenu || showBrandMenu) {
+    if (showCategoryMenu || showBrandMenu || showCollectionMenu) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showCategoryMenu, showBrandMenu])
+  }, [showCategoryMenu, showBrandMenu, showCollectionMenu])
 
   // Datos de respaldo (fallback) si Firebase no está disponible
   const fallbackPerfumes: Perfume[] = [
@@ -90,27 +95,36 @@ export default function Catalogo() {
 
   // Función para extraer la marca del nombre del perfume
   const getBrandFromName = (name: string): string => {
-    if (name.includes('Arabiyat Prestige')) {
-      return 'Arabiyat Prestige'
-    } else if (name.includes('Arabiyat')) {
+    // Todos los productos que contengan "Arabiyat" son de la marca "Arabiyat"
+    if (name.toLowerCase().includes('arabiyat')) {
       return 'Arabiyat'
     }
+    // Si tiene brand en el objeto, usarlo
     return 'Otras'
   }
 
   // Función para extraer la colección del nombre del perfume
   const getCollectionFromName = (name: string): string => {
-    // Remover "Arabiyat" y "Prestige" del nombre
-    let cleanName = name.replace(/Arabiyat\s*Prestige\s*/gi, '').replace(/Arabiyat\s*/gi, '')
-    // Remover "Eau De Parfum" y variaciones
-    cleanName = cleanName.replace(/\s*Eau\s*De\s*Parfum.*/gi, '').replace(/\s*Eau\s*De\s*Parfume.*/gi, '')
-    // Extraer la primera palabra o palabras que forman la colección
-    // Ejemplos: "Ash'aa", "Lutfah", "Bahiya", "Bedour", etc.
-    const words = cleanName.trim().split(/\s+/)
-    if (words.length >= 1) {
-      // Tomar la primera palabra como colección
-      return words[0]
+    const lowerName = name.toLowerCase()
+    
+    // Detectar colecciones específicas de Arabiyat
+    if (lowerName.includes('arabiyat sugar')) {
+      return 'Sugar'
     }
+    if (lowerName.includes('arabiyat prestige')) {
+      // Todos los productos Prestige van a la colección "Prestige"
+      return 'Prestige'
+    }
+    if (lowerName.includes('arabiyat ash')) {
+      return 'Ash\'aa'
+    }
+    
+    // Lutfah y Perfume Oil no son colecciones, van a "General"
+    // Si solo dice "Arabiyat" sin especificar colección, es "General"
+    if (lowerName.includes('arabiyat')) {
+      return 'General'
+    }
+    
     return 'General'
   }
 
@@ -118,24 +132,42 @@ export default function Catalogo() {
   const displayPerfumes = perfumes.length > 0 ? perfumes : fallbackPerfumes
   
   // Obtener todas las marcas únicas
-  const allBrands = Array.from(new Set(displayPerfumes.map(p => p.brand || getBrandFromName(p.name))))
+  // Normalizar: todos los productos con "Arabiyat" en brand o name van a marca "Arabiyat"
+  const allBrands = Array.from(new Set(displayPerfumes.map(p => {
+    const brand = p.brand || getBrandFromName(p.name)
+    // Si el brand contiene "Arabiyat", normalizar a "Arabiyat"
+    if (brand.toLowerCase().includes('arabiyat')) {
+      return 'Arabiyat'
+    }
+    return brand
+  })))
   const brands = ['Todas', ...allBrands.sort()]
 
   // Obtener colecciones de la marca seleccionada
   const brandPerfumes = selectedBrand === 'Todas' 
     ? displayPerfumes 
     : displayPerfumes.filter(p => {
-        const brand = p.brand || getBrandFromName(p.name)
+        let brand = p.brand || getBrandFromName(p.name)
+        // Normalizar: si contiene "Arabiyat", es "Arabiyat"
+        if (brand.toLowerCase().includes('arabiyat')) {
+          brand = 'Arabiyat'
+        }
         return brand === selectedBrand
       })
 
-  const allCollections = Array.from(new Set(brandPerfumes.map(p => getCollectionFromName(p.name))))
+  const allCollections = Array.from(new Set(brandPerfumes.map(p => {
+    return getCollectionFromName(p.name)
+  })))
   const collections = ['Todas', ...allCollections.sort()]
 
   // Filtrar por categoría, marca y colección
   const filteredPerfumes = displayPerfumes.filter(p => {
     const categoryMatch = selectedCategory === 'Todos' || p.category === selectedCategory
-    const brand = p.brand || getBrandFromName(p.name)
+    let brand = p.brand || getBrandFromName(p.name)
+    // Normalizar: si contiene "Arabiyat", es "Arabiyat"
+    if (brand.toLowerCase().includes('arabiyat')) {
+      brand = 'Arabiyat'
+    }
     const brandMatch = selectedBrand === 'Todas' || brand === selectedBrand
     const collection = getCollectionFromName(p.name)
     const collectionMatch = selectedCollection === 'Todas' || collection === selectedCollection
@@ -146,6 +178,8 @@ export default function Catalogo() {
   const handleBrandChange = (brand: string) => {
     setSelectedBrand(brand)
     setSelectedCollection('Todas')
+    setShowBrandMenu(false)
+    setShowCollectionMenu(false)
   }
 
   return (
@@ -240,6 +274,7 @@ export default function Catalogo() {
                 onClick={() => {
                   setShowBrandMenu(!showBrandMenu)
                   setShowCategoryMenu(false)
+                  setShowCollectionMenu(false)
                 }}
                 className="w-full px-4 py-3 rounded-none text-sm font-medium"
                 style={selectedBrand !== 'Todas' ? {
@@ -274,23 +309,47 @@ export default function Catalogo() {
                   }}
                 >
                   {brands.map((brand) => (
-                    <button
-                      key={brand}
-                      onClick={() => {
-                        handleBrandChange(brand)
-                        setShowBrandMenu(false)
-                      }}
-                      className="w-full px-4 py-3 text-left text-sm font-medium transition-all active:scale-95 border-b border-b-[#444] last:border-b-0"
-                      style={selectedBrand === brand ? {
-                        backgroundColor: currentTheme.colors.accent,
-                        color: getButtonTextColor(currentTheme.colors.accent),
-                      } : {
-                        backgroundColor: currentTheme.colors.surface,
-                        color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
-                      }}
-                    >
-                      {brand === 'Todas' ? t('catalog.allBrands') : brand}
-                    </button>
+                    <div key={brand} className="relative">
+                      <button
+                        onClick={() => {
+                          handleBrandChange(brand)
+                        }}
+                        className="w-full px-4 py-3 text-left text-sm font-medium transition-all active:scale-95 border-b border-b-[#444] last:border-b-0 flex items-center justify-between"
+                        style={selectedBrand === brand ? {
+                          backgroundColor: currentTheme.colors.accent,
+                          color: getButtonTextColor(currentTheme.colors.accent),
+                        } : {
+                          backgroundColor: currentTheme.colors.surface,
+                          color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
+                        }}
+                      >
+                        <span>{brand === 'Todas' ? t('catalog.allBrands') : brand}</span>
+                        {brand !== 'Todas' && (() => {
+                          // Calcular colecciones para esta marca específica
+                          const brandPerfumesForThisBrand = displayPerfumes.filter(p => {
+                            let pBrand = p.brand || getBrandFromName(p.name)
+                            // Normalizar: si contiene "Arabiyat", es "Arabiyat"
+                            if (pBrand.toLowerCase().includes('arabiyat')) {
+                              pBrand = 'Arabiyat'
+                            }
+                            return pBrand === brand
+                          })
+                          const collectionsForBrand = Array.from(new Set(brandPerfumesForThisBrand.map(p => {
+                            return getCollectionFromName(p.name)
+                          })))
+                          return collectionsForBrand.length > 1 && (
+                            <svg 
+                              className="w-4 h-4"
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          )
+                        })()}
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -298,33 +357,69 @@ export default function Catalogo() {
           </div>
         </section>
 
-        {/* Colecciones - Solo se muestra si hay una marca seleccionada */}
+        {/* Botón Colecciones - Solo se muestra si hay una marca seleccionada */}
         {selectedBrand !== 'Todas' && collections.length > 1 && (
-          <section className="mb-6">
-            <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
-              {collections.map((collection, index) => (
-                <motion.button
-                  key={collection}
-                  onClick={() => setSelectedCollection(collection)}
-                  className="px-4 py-2 rounded-none text-sm font-medium whitespace-nowrap"
-                  style={selectedCollection === collection ? {
-                    backgroundColor: currentTheme.colors.accent,
-                    color: getButtonTextColor(currentTheme.colors.accent),
-                    boxShadow: `0 2px 8px ${currentTheme.colors.accent}40`
-                  } : {
-                    backgroundColor: currentTheme.colors.surface,
-                    color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
-                    border: `1px solid ${currentTheme.colors.accent}30`
-                  }}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
+          <section className="mb-4">
+            <div className="relative" ref={collectionMenuRef}>
+              <motion.button
+                onClick={() => {
+                  setShowCollectionMenu(!showCollectionMenu)
+                  setShowCategoryMenu(false)
+                  setShowBrandMenu(false)
+                }}
+                className="w-full px-4 py-3 rounded-none text-sm font-medium"
+                style={selectedCollection !== 'Todas' ? {
+                  backgroundColor: currentTheme.colors.accent,
+                  color: getButtonTextColor(currentTheme.colors.accent),
+                } : {
+                  backgroundColor: currentTheme.colors.surface,
+                  color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {t('catalog.collections')} {selectedBrand !== 'Todas' && `(${selectedBrand})`}
+                <svg 
+                  className={`w-4 h-4 inline-block ml-2 transition-transform ${showCollectionMenu ? 'rotate-180' : ''}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
                 >
-                  {collection === 'Todas' ? t('catalog.allCollections') : collection}
-                </motion.button>
-              ))}
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </motion.button>
+              
+              {/* Menú desplegable de Colecciones */}
+              {showCollectionMenu && (
+                <div 
+                  className="absolute top-full left-0 right-0 z-20 mt-1 rounded-none overflow-hidden max-h-64 overflow-y-auto"
+                  style={{ 
+                    backgroundColor: currentTheme.colors.surface,
+                    border: `1px solid ${currentTheme.colors.accent}`,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+                  }}
+                >
+                  {collections.map((collection) => (
+                    <button
+                      key={collection}
+                      onClick={() => {
+                        setSelectedCollection(collection)
+                        setShowCollectionMenu(false)
+                      }}
+                      className="w-full px-4 py-3 text-left text-sm font-medium transition-all active:scale-95 border-b border-b-[#444] last:border-b-0"
+                      style={selectedCollection === collection ? {
+                        backgroundColor: currentTheme.colors.accent,
+                        color: getButtonTextColor(currentTheme.colors.accent),
+                      } : {
+                        backgroundColor: currentTheme.colors.surface,
+                        color: getIconColor(currentTheme.colors.surface, currentTheme.colors.accent),
+                      }}
+                    >
+                      {collection === 'Todas' ? t('catalog.allCollections') : collection}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         )}

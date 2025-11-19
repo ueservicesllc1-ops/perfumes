@@ -23,8 +23,12 @@ import AdminNotificationList from '@/components/admin/AdminNotificationList'
 import AdminNotificationForm from '@/components/admin/AdminNotificationForm'
 import { getAllNotifications } from '@/lib/firebase/notifications'
 import type { Notification } from '@/lib/firebase/notifications'
+import { getAllOrders } from '@/lib/firebase/orders'
+import type { Order } from '@/lib/firebase/orders'
+import AdminOrderList from '@/components/admin/AdminOrderList'
+import AdminAnalytics from '@/components/admin/AdminAnalytics'
 
-type AdminSection = 'menu' | 'products' | 'videos' | 'availability' | 'materials' | 'notifications'
+type AdminSection = 'menu' | 'products' | 'videos' | 'availability' | 'materials' | 'notifications' | 'orders' | 'analytics'
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null)
@@ -49,6 +53,7 @@ export default function AdminPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
   const [showNotificationForm, setShowNotificationForm] = useState(false)
+  const [orders, setOrders] = useState<Order[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -67,6 +72,8 @@ export default function AdminPage() {
         loadMaterials()
       } else if (section === 'notifications') {
         loadNotifications()
+      } else if (section === 'orders') {
+        loadOrders()
       }
     }
   }, [user, section])
@@ -177,6 +184,15 @@ export default function AdminPage() {
       setNotifications(data)
     } catch (error) {
       console.error('Error cargando notificaciones:', error)
+    }
+  }
+
+  async function loadOrders() {
+    try {
+      const data = await getAllOrders()
+      setOrders(data)
+    } catch (error) {
+      console.error('Error cargando pedidos:', error)
     }
   }
 
@@ -434,6 +450,8 @@ export default function AdminPage() {
                   setSelectedSlot(null)
                   setSelectedMaterial(null)
                   setSelectedNotification(null)
+                  setOrders([])
+                  setSection('menu')
                 }}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all active:scale-95"
                 style={{ backgroundColor: '#2a2a2a', color: '#D4AF37', border: '1px solid #444' }}
@@ -521,80 +539,110 @@ export default function AdminPage() {
       {/* Content - Mobile Optimized */}
       <div className="px-4 py-4">
         {section === 'menu' ? (
-          <div className="space-y-4">
+          <div>
             <h2 className="text-xl font-bold mb-6 text-center" style={{ color: '#D4AF37' }}>
               ¿Qué deseas gestionar?
             </h2>
-            <button
-              onClick={() => setSection('products')}
-              className="w-full py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                border: '2px solid #D4AF37',
-                color: '#D4AF37'
-              }}
-            >
-              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-              <span className="text-lg">Productos</span>
-            </button>
-            <button
-              onClick={() => setSection('videos')}
-              className="w-full py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                border: '2px solid #D4AF37',
-                color: '#D4AF37'
-              }}
-            >
-              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              <span className="text-lg">Videos</span>
-            </button>
-            <button
-              onClick={() => setSection('availability')}
-              className="w-full py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                border: '2px solid #D4AF37',
-                color: '#D4AF37'
-              }}
-            >
-              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span className="text-lg">Horarios</span>
-            </button>
-            <button
-              onClick={() => setSection('materials')}
-              className="w-full py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                border: '2px solid #D4AF37',
-                color: '#D4AF37'
-              }}
-            >
-              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span className="text-lg">Material de Apoyo</span>
-            </button>
-            <button
-              onClick={() => setSection('notifications')}
-              className="w-full py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
-              style={{ 
-                backgroundColor: '#2a2a2a', 
-                border: '2px solid #D4AF37',
-                color: '#D4AF37'
-              }}
-            >
-              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              <span className="text-lg">Notificaciones</span>
-            </button>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setSection('products')}
+                className="py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+                style={{ 
+                  backgroundColor: '#2a2a2a', 
+                  border: '2px solid #D4AF37',
+                  color: '#D4AF37'
+                }}
+              >
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                <span className="text-base">Productos</span>
+              </button>
+              <button
+                onClick={() => setSection('videos')}
+                className="py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+                style={{ 
+                  backgroundColor: '#2a2a2a', 
+                  border: '2px solid #D4AF37',
+                  color: '#D4AF37'
+                }}
+              >
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span className="text-base">Videos</span>
+              </button>
+              <button
+                onClick={() => setSection('availability')}
+                className="py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+                style={{ 
+                  backgroundColor: '#2a2a2a', 
+                  border: '2px solid #D4AF37',
+                  color: '#D4AF37'
+                }}
+              >
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-base">Horarios</span>
+              </button>
+              <button
+                onClick={() => setSection('materials')}
+                className="py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+                style={{ 
+                  backgroundColor: '#2a2a2a', 
+                  border: '2px solid #D4AF37',
+                  color: '#D4AF37'
+                }}
+              >
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-base">Material de Apoyo</span>
+              </button>
+              <button
+                onClick={() => setSection('notifications')}
+                className="py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+                style={{ 
+                  backgroundColor: '#2a2a2a', 
+                  border: '2px solid #D4AF37',
+                  color: '#D4AF37'
+                }}
+              >
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span className="text-base">Notificaciones</span>
+              </button>
+              <button
+                onClick={() => setSection('orders')}
+                className="py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+                style={{ 
+                  backgroundColor: '#2a2a2a', 
+                  border: '2px solid #D4AF37',
+                  color: '#D4AF37'
+                }}
+              >
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-base">Pedidos</span>
+              </button>
+              <button
+                onClick={() => setSection('analytics')}
+                className="py-6 rounded-lg font-medium transition-all active:scale-95 flex flex-col items-center justify-center gap-3"
+                style={{ 
+                  backgroundColor: '#2a2a2a', 
+                  border: '2px solid #D4AF37',
+                  color: '#D4AF37'
+                }}
+              >
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span className="text-base">Datos</span>
+              </button>
+            </div>
           </div>
         ) : section === 'products' ? (
           showProductForm ? (
@@ -668,6 +716,13 @@ export default function AdminPage() {
               onRefresh={loadNotifications}
             />
           )
+        ) : section === 'orders' ? (
+          <AdminOrderList
+            orders={orders}
+            onRefresh={loadOrders}
+          />
+        ) : section === 'analytics' ? (
+          <AdminAnalytics />
         ) : null}
       </div>
     </div>

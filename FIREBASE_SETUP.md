@@ -127,3 +127,4 @@ El catálogo (`app/catalogo/page.tsx`) ya está configurado para usar Firebase. 
 4. Subir imágenes a Firebase Storage
 
 
+

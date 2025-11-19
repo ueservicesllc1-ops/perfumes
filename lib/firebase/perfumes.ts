@@ -18,6 +18,7 @@ export interface Perfume {
   name: string;
   price: number;
   originalPrice?: number;
+  costPrice?: number; // Precio de costo (solo para cálculos internos, no se muestra al público)
   category: 'For Her' | 'For Him' | 'For Both';
   brand?: string;
   size?: string;

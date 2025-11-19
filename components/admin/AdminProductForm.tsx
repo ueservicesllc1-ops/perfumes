@@ -19,6 +19,7 @@ export default function AdminProductForm({ perfume, onClose, onSuccess }: AdminP
     name: '',
     price: '',
     originalPrice: '',
+    costPrice: '',
     category: 'For Both' as 'For Her' | 'For Him' | 'For Both',
     brand: '',
     size: '',
@@ -35,6 +36,7 @@ export default function AdminProductForm({ perfume, onClose, onSuccess }: AdminP
         name: perfume.name || '',
         price: perfume.price?.toString() || '',
         originalPrice: perfume.originalPrice?.toString() || '',
+        costPrice: perfume.costPrice?.toString() || '',
         category: perfume.category || 'For Both',
         brand: perfume.brand || '',
         size: perfume.size || '',
@@ -113,6 +115,9 @@ export default function AdminProductForm({ perfume, onClose, onSuccess }: AdminP
       // Agregar campos opcionales solo si tienen valor
       if (formData.originalPrice && formData.originalPrice.trim()) {
         perfumeData.originalPrice = parseFloat(formData.originalPrice)
+      }
+      if (formData.costPrice && formData.costPrice.trim()) {
+        perfumeData.costPrice = parseFloat(formData.costPrice)
       }
       if (formData.brand && formData.brand.trim()) {
         perfumeData.brand = formData.brand
@@ -291,6 +296,26 @@ export default function AdminProductForm({ perfume, onClose, onSuccess }: AdminP
                 style={{ backgroundColor: '#1a1a1a', color: '#FFFFFF', border: '1px solid #444' }}
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: '#999' }}>
+              Precio de Costo (Solo para cálculos internos)
+            </label>
+            <input
+              type="number"
+              name="costPrice"
+              value={formData.costPrice}
+              onChange={handleInputChange}
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              className="w-full px-3 py-2 rounded-lg text-sm"
+              style={{ backgroundColor: '#1a1a1a', color: '#FFFFFF', border: '1px solid #444' }}
+            />
+            <p className="text-[10px] mt-1" style={{ color: '#666' }}>
+              Este precio no se muestra al público, solo para calcular márgenes
+            </p>
           </div>
 
           <div>
