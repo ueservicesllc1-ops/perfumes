@@ -1,5 +1,5 @@
-// Script para agregar productos faltantes de la colección Arabiyat Fragrances
-// Ejecutar con: npx tsx scripts/add-arabiyat-fragrances.ts
+// Script para agregar todos los productos de la marca Armaf desde Shopify
+// Ejecutar con: npx tsx scripts/add-armaf-products.ts
 
 import { getAllPerfumes, addPerfume } from '../lib/firebase/perfumes'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
@@ -44,7 +44,7 @@ interface ShopifyCollection {
 }
 
 async function getShopifyProducts(): Promise<ShopifyProduct[]> {
-  console.log('🔍 Obteniendo productos desde la API de Shopify...\n')
+  console.log('🔍 Obteniendo productos Armaf desde la API de Shopify...\n')
   
   const allProducts: ShopifyProduct[] = []
   let page = 1
@@ -52,9 +52,9 @@ async function getShopifyProducts(): Promise<ShopifyProduct[]> {
   
   try {
     while (hasMore) {
-      const url = `https://fragrancewholesalerusa.com/collections/arabiyat-fragrances/products.json?page=${page}`
+      const url = `https://fragrancewholesalerusa.com/collections/all/products.json?page=${page}`
       
-      console.log(`📡 Consultando página ${page}: ${url}`)
+      console.log(`📡 Consultando página ${page}...`)
       const response = await fetch(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -73,22 +73,24 @@ async function getShopifyProducts(): Promise<ShopifyProduct[]> {
         break
       }
       
-      allProducts.push(...data.products)
-      console.log(`  ✓ Página ${page}: ${data.products.length} productos (Total: ${allProducts.length})`)
+      // Filtrar solo productos de Armaf
+      const armafProducts = data.products.filter(p => 
+        p.vendor.toLowerCase().includes('armaf') ||
+        p.title.toLowerCase().includes('armaf')
+      )
       
-      // Shopify normalmente devuelve 30 productos por página en colecciones
-      // Si hay menos de 30, es la última página
+      allProducts.push(...armafProducts)
+      console.log(`  ✓ Página ${page}: ${armafProducts.length} productos Armaf (Total: ${allProducts.length})`)
+      
       if (data.products.length < 30) {
         hasMore = false
       } else {
         page++
-        // Pequeño delay para no sobrecargar
         await new Promise(resolve => setTimeout(resolve, 500))
       }
     }
     
-    console.log(`\n✓ Total encontrados: ${allProducts.length} productos en ${page} página(s)\n`)
-    
+    console.log(`\n✓ Total encontrados: ${allProducts.length} productos Armaf\n`)
     return allProducts
   } catch (error: any) {
     console.error('✗ Error obteniendo productos:', error.message)
@@ -110,12 +112,10 @@ function productsMatch(shopifyName: string, firestoreName: string): boolean {
   const normalizedShopify = normalizeProductName(shopifyName)
   const normalizedFirestore = normalizeProductName(firestoreName)
   
-  // Coincidencia exacta
   if (normalizedShopify === normalizedFirestore) {
     return true
   }
   
-  // Coincidencia parcial (al menos 80% de palabras en común)
   const shopifyWords = normalizedShopify.split(' ').filter(w => w.length > 2)
   const firestoreWords = normalizedFirestore.split(' ').filter(w => w.length > 2)
   const matchCount = shopifyWords.filter(w => firestoreWords.some(f => f.includes(w) || w.includes(f))).length
@@ -143,17 +143,20 @@ function determineCategory(vendor: string, title: string, tags: string[]): 'For 
     return 'For Both'
   }
   
-  // Default a For Both si no está claro
   return 'For Both'
 }
 
 function extractSize(title: string): string {
-  const sizeMatch = title.match(/(\d+\.?\d*)\s*FL\.?OZ/i) || title.match(/(\d+)\s*ML/i)
+  const sizeMatch = title.match(/(\d+\.?\d*)\s*FL\.?OZ/i) || 
+                   title.match(/(\d+)\s*ML/i) ||
+                   title.match(/(\d+\.?\d*)\s*OZ/i)
   if (sizeMatch) {
     if (title.includes('ML')) {
       return `${sizeMatch[1]}ML`
     }
-    return `${sizeMatch[1]}FL.OZ`
+    if (title.includes('OZ')) {
+      return `${sizeMatch[1]}FL.OZ`
+    }
   }
   return '3.4FL.OZ' // Default
 }
@@ -164,7 +167,6 @@ async function downloadAndUploadImage(imageUrl: string, productName: string): Pr
       return ''
     }
     
-    // Limpiar URL de Shopify
     let cleanUrl = imageUrl.split('?')[0]
     cleanUrl = cleanUrl.replace(/_[0-9]+x[0-9]+\./g, '.')
     
@@ -194,16 +196,16 @@ async function downloadAndUploadImage(imageUrl: string, productName: string): Pr
     
     const timestamp = Date.now()
     const randomId = Math.random().toString(36).substring(7)
-    const ext = cleanUrl.includes('.webp') ? 'webp' : 'jpg'
+    const ext = cleanUrl.includes('.webp') ? 'webp' : (cleanUrl.includes('.png') ? 'png' : 'jpg')
     const fileName = `${sanitizedName}-${timestamp}-${randomId}.${ext}`
-    const b2Path = `perfumes/arabiyat/${fileName}`
+    const b2Path = `perfumes/armaf/${fileName}`
     
     console.log(`  📤 Subiendo a B2...`)
     const command = new PutObjectCommand({
       Bucket: b2Config.bucketName,
       Key: b2Path,
       Body: buffer,
-      ContentType: ext === 'webp' ? 'image/webp' : 'image/jpeg',
+      ContentType: ext === 'webp' ? 'image/webp' : (ext === 'png' ? 'image/png' : 'image/jpeg'),
     })
     
     await s3Client.send(command)
@@ -216,14 +218,14 @@ async function downloadAndUploadImage(imageUrl: string, productName: string): Pr
   }
 }
 
-async function addMissingProducts() {
-  console.log('🚀 Iniciando agregado de productos faltantes de Arabiyat Fragrances...\n')
+async function addArmafProducts() {
+  console.log('🚀 Iniciando agregado de productos Armaf...\n')
   
   // Obtener productos de Shopify
   const shopifyProducts = await getShopifyProducts()
   
   if (shopifyProducts.length === 0) {
-    console.log('⚠ No se encontraron productos en Shopify')
+    console.log('⚠ No se encontraron productos Armaf en Shopify')
     return
   }
   
@@ -252,8 +254,11 @@ async function addMissingProducts() {
       
       // Obtener precio (usar el primer variant)
       const variant = shopifyProduct.variants[0]
-      const price = parseFloat(variant.price) / 100 // Shopify prices are in cents
-      const originalPrice = variant.compare_at_price ? parseFloat(variant.compare_at_price) / 100 : undefined
+      // Los precios de Shopify vienen como strings, parsearlos directamente
+      const price = parseFloat(variant.price)
+      const originalPrice = variant.compare_at_price ? parseFloat(variant.compare_at_price) : undefined
+      
+      console.log(`  💰 Precio raw: ${variant.price} -> $${price.toFixed(2)}${originalPrice ? ` (Original: $${originalPrice.toFixed(2)})` : ''}`)
       
       // Determinar categoría
       const category = determineCategory(shopifyProduct.vendor, shopifyProduct.title, shopifyProduct.tags)
@@ -272,7 +277,7 @@ async function addMissingProducts() {
         name: shopifyProduct.title,
         price: price,
         category: category,
-        brand: shopifyProduct.vendor || 'Arabiyat Prestige',
+        brand: 'Armaf',
         size: size,
         inStock: true,
         description: `${shopifyProduct.title} - ${shopifyProduct.vendor}`,
@@ -308,7 +313,7 @@ async function addMissingProducts() {
   console.log('='.repeat(50))
 }
 
-addMissingProducts().catch((error) => {
+addArmafProducts().catch((error) => {
   console.error('Error fatal:', error)
   process.exit(1)
 })

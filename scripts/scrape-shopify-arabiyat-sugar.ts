@@ -62,7 +62,7 @@ async function getShopifyProducts(): Promise<ShopifyProduct[]> {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`)
     }
     
-    const data: ShopifyCollection = await response.json()
+    const data = await response.json() as ShopifyCollection
     console.log(`✓ Encontrados ${data.products.length} productos en la colección\n`)
     
     // Filtrar solo productos de Arabiyat Sugar
@@ -92,7 +92,7 @@ async function getShopifyProducts(): Promise<ShopifyProduct[]> {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
       
-      const data: ShopifyCollection = await response.json()
+      const data = await response.json() as ShopifyCollection
       const arabiyatSugarProducts = data.products.filter(product => 
         product.tags.some(tag => tag.toLowerCase().includes('arabiyat sugar')) ||
         product.title.toLowerCase().includes('arabiyat sugar') ||

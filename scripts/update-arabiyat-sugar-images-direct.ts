@@ -85,7 +85,7 @@ function generateImageUrls(productName: string): string[] {
     }
   }
   
-  return [...new Set(urls)] // Eliminar duplicados
+  return Array.from(new Set(urls)) // Eliminar duplicados
 }
 
 async function checkImageExists(url: string): Promise<boolean> {

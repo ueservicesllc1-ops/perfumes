@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Perfume } from '@/lib/firebase/perfumes'
 import PerfumeImage from '@/components/PerfumeImage'
 import { deletePerfume } from '@/lib/firebase/perfumes'
@@ -14,10 +14,124 @@ interface AdminProductListProps {
 export default function AdminProductList({ perfumes, onEdit, onRefresh }: AdminProductListProps) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedBrand, setSelectedBrand] = useState<string>('Todas')
+  const [selectedCollection, setSelectedCollection] = useState<string>('Todas')
+  const [showBrandMenu, setShowBrandMenu] = useState(false)
+  const [showCollectionMenu, setShowCollectionMenu] = useState(false)
+  const brandMenuRef = useRef<HTMLDivElement>(null)
+  const collectionMenuRef = useRef<HTMLDivElement>(null)
 
-  const filteredPerfumes = perfumes.filter(perfume =>
-    perfume.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Función para extraer la marca del nombre del perfume
+  const getBrandFromName = (name: string): string => {
+    const lowerName = name.toLowerCase()
+    if (lowerName.includes('arabiyat')) {
+      return 'Arabiyat'
+    }
+    if (lowerName.includes('armaf')) {
+      return 'Armaf'
+    }
+    // Si el producto tiene brand en el objeto, usarlo
+    return 'Otras'
+  }
+
+  // Función para extraer la colección del nombre del perfume
+  const getCollectionFromName = (name: string): string => {
+    const lowerName = name.toLowerCase()
+    
+    // Solo Arabiyat tiene colecciones definidas
+    if (lowerName.includes('arabiyat sugar')) {
+      return 'Sugar'
+    }
+    if (lowerName.includes('arabiyat prestige')) {
+      return 'Prestige'
+    }
+    if (lowerName.includes('arabiyat ash')) {
+      return 'Ash\'aa'
+    }
+    
+    if (lowerName.includes('arabiyat')) {
+      return 'General'
+    }
+    
+    // Para otras marcas, usar "General" como colección por defecto
+    return 'General'
+  }
+
+  // Cerrar menús al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (brandMenuRef.current && !brandMenuRef.current.contains(event.target as Node)) {
+        setShowBrandMenu(false)
+      }
+      if (collectionMenuRef.current && !collectionMenuRef.current.contains(event.target as Node)) {
+        setShowCollectionMenu(false)
+      }
+    }
+
+    if (showBrandMenu || showCollectionMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showBrandMenu, showCollectionMenu])
+
+  // Obtener todas las marcas únicas
+  const allBrands = Array.from(new Set(perfumes.map(p => {
+    let brand = p.brand || getBrandFromName(p.name)
+    // Normalizar marcas
+    if (brand.toLowerCase().includes('arabiyat')) {
+      brand = 'Arabiyat'
+    } else if (brand.toLowerCase().includes('armaf')) {
+      brand = 'Armaf'
+    }
+    return brand || 'Otras'
+  })))
+  const brands = ['Todas', ...allBrands.sort()]
+
+  // Obtener colecciones de la marca seleccionada
+  const brandPerfumes = selectedBrand === 'Todas' 
+    ? perfumes 
+    : perfumes.filter(p => {
+        let brand = p.brand || getBrandFromName(p.name)
+        // Normalizar marcas
+        if (brand.toLowerCase().includes('arabiyat')) {
+          brand = 'Arabiyat'
+        } else if (brand.toLowerCase().includes('armaf')) {
+          brand = 'Armaf'
+        }
+        return brand === selectedBrand
+      })
+
+  const allCollections = Array.from(new Set(brandPerfumes.map(p => {
+    return getCollectionFromName(p.name)
+  })))
+  const collections = ['Todas', ...allCollections.sort()]
+
+  // Resetear colección cuando cambia la marca
+  const handleBrandChange = (brand: string) => {
+    setSelectedBrand(brand)
+    setSelectedCollection('Todas')
+    setShowBrandMenu(false)
+    setShowCollectionMenu(false)
+  }
+
+  // Filtrar por búsqueda, marca y colección
+  const filteredPerfumes = perfumes.filter(perfume => {
+    const searchMatch = perfume.name.toLowerCase().includes(searchTerm.toLowerCase())
+    let brand = perfume.brand || getBrandFromName(perfume.name)
+    // Normalizar marcas
+    if (brand.toLowerCase().includes('arabiyat')) {
+      brand = 'Arabiyat'
+    } else if (brand.toLowerCase().includes('armaf')) {
+      brand = 'Armaf'
+    }
+    const brandMatch = selectedBrand === 'Todas' || brand === selectedBrand
+    const collection = getCollectionFromName(perfume.name)
+    const collectionMatch = selectedCollection === 'Todas' || collection === selectedCollection
+    return searchMatch && brandMatch && collectionMatch
+  })
 
   async function handleDelete(perfumeId: string) {
     if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
@@ -50,22 +164,132 @@ export default function AdminProductList({ perfumes, onEdit, onRefresh }: AdminP
         />
       </div>
 
+      {/* Filters - Brand and Collection */}
+      <div className="mb-4 flex gap-2">
+        {/* Brand Filter */}
+        <div className="flex-1 relative" ref={brandMenuRef}>
+          <button
+            onClick={() => {
+              setShowBrandMenu(!showBrandMenu)
+              setShowCollectionMenu(false)
+            }}
+            className="w-full px-3 py-2 rounded-lg text-sm font-medium transition-all active:scale-95 flex items-center justify-between"
+            style={{
+              backgroundColor: selectedBrand !== 'Todas' ? '#D4AF37' : '#2a2a2a',
+              color: selectedBrand !== 'Todas' ? '#000000' : '#FFFFFF',
+              border: `1px solid ${selectedBrand !== 'Todas' ? '#D4AF37' : '#444'}`
+            }}
+          >
+            <span>{selectedBrand}</span>
+            <svg 
+              className={`w-4 h-4 transition-transform ${showBrandMenu ? 'rotate-180' : ''}`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {showBrandMenu && (
+            <div 
+              className="absolute top-full left-0 right-0 z-20 mt-1 rounded-lg overflow-hidden max-h-60 overflow-y-auto"
+              style={{ 
+                backgroundColor: '#2a2a2a',
+                border: '1px solid #444',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+              }}
+            >
+              {brands.map((brand) => (
+                <button
+                  key={brand}
+                  onClick={() => handleBrandChange(brand)}
+                  className="w-full px-3 py-2 text-left text-sm transition-colors"
+                  style={{
+                    backgroundColor: selectedBrand === brand ? '#D4AF37' : '#2a2a2a',
+                    color: selectedBrand === brand ? '#000000' : '#FFFFFF'
+                  }}
+                >
+                  {brand}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Collection Filter - Only show if a brand is selected and has collections */}
+        {selectedBrand !== 'Todas' && selectedBrand === 'Arabiyat' && collections.length > 1 && (
+          <div className="flex-1 relative" ref={collectionMenuRef}>
+            <button
+              onClick={() => {
+                setShowCollectionMenu(!showCollectionMenu)
+                setShowBrandMenu(false)
+              }}
+              className="w-full px-3 py-2 rounded-lg text-sm font-medium transition-all active:scale-95 flex items-center justify-between"
+              style={{
+                backgroundColor: selectedCollection !== 'Todas' ? '#D4AF37' : '#2a2a2a',
+                color: selectedCollection !== 'Todas' ? '#000000' : '#FFFFFF',
+                border: `1px solid ${selectedCollection !== 'Todas' ? '#D4AF37' : '#444'}`
+              }}
+            >
+              <span>{selectedCollection}</span>
+              <svg 
+                className={`w-4 h-4 transition-transform ${showCollectionMenu ? 'rotate-180' : ''}`}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {showCollectionMenu && (
+              <div 
+                className="absolute top-full left-0 right-0 z-20 mt-1 rounded-lg overflow-hidden max-h-60 overflow-y-auto"
+                style={{ 
+                  backgroundColor: '#2a2a2a',
+                  border: '1px solid #444',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+                }}
+              >
+                {collections.map((collection) => (
+                  <button
+                    key={collection}
+                    onClick={() => {
+                      setSelectedCollection(collection)
+                      setShowCollectionMenu(false)
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm transition-colors"
+                    style={{
+                      backgroundColor: selectedCollection === collection ? '#D4AF37' : '#2a2a2a',
+                      color: selectedCollection === collection ? '#000000' : '#FFFFFF'
+                    }}
+                  >
+                    {collection}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Stats - Mobile Optimized */}
       <div className="mb-4 grid grid-cols-3 gap-2">
         <div className="p-3 rounded-lg text-center" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
-          <p className="text-xs mb-1" style={{ color: '#999' }}>Total</p>
-          <p className="text-lg font-bold" style={{ color: '#D4AF37' }}>{perfumes.length}</p>
+          <p className="text-xs mb-1" style={{ color: '#999' }}>Mostrando</p>
+          <p className="text-lg font-bold" style={{ color: '#D4AF37' }}>{filteredPerfumes.length}</p>
         </div>
         <div className="p-3 rounded-lg text-center" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
           <p className="text-xs mb-1" style={{ color: '#999' }}>Stock</p>
           <p className="text-lg font-bold" style={{ color: '#D4AF37' }}>
-            {perfumes.filter(p => p.inStock).length}
+            {filteredPerfumes.filter(p => p.inStock).length}
           </p>
         </div>
         <div className="p-3 rounded-lg text-center" style={{ backgroundColor: '#2a2a2a', border: '1px solid #444' }}>
           <p className="text-xs mb-1" style={{ color: '#999' }}>Sin Stock</p>
           <p className="text-lg font-bold" style={{ color: '#D4AF37' }}>
-            {perfumes.filter(p => !p.inStock).length}
+            {filteredPerfumes.filter(p => !p.inStock).length}
           </p>
         </div>
       </div>

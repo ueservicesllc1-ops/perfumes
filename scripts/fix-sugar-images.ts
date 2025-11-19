@@ -56,7 +56,7 @@ async function getShopifySugarProducts(): Promise<ShopifyProduct[]> {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
       
-      const data: ShopifyCollection = await response.json()
+      const data = await response.json() as ShopifyCollection
       
       if (data.products.length === 0) {
         hasMore = false
